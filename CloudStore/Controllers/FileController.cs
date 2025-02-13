@@ -5,15 +5,15 @@ using Microsoft.VisualBasic;
 
 namespace CloudStore.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("cloud-store-api/[controller]")]
     [ApiController]
     public class FileController : ControllerBase
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly CloudStoreDbHelper _dbHelper;
+        private readonly CSFilesDbHelper _dbHelper;
         private readonly string _userDirectory;
 
-        public FileController(IWebHostEnvironment webHostEnvironment, CloudStoreDbHelper dbHelper)
+        public FileController(IWebHostEnvironment webHostEnvironment, CSFilesDbHelper dbHelper)
         {
             _webHostEnvironment = webHostEnvironment;
             _dbHelper = dbHelper;
@@ -56,9 +56,8 @@ namespace CloudStore.Controllers
         public async Task Delete(int id) =>
             await _dbHelper.DeleteFileByIdAsync(id);
 
-        //[Route("api/directory")]
-        [HttpPost("new-directory/{directory}")]
-        public IActionResult PostDirectory(string directory)
+        [HttpPost("new-directory")]
+        public IActionResult PostDirectory([FromBody] string directory)
         {
             var newDirectory = Path.Combine(_userDirectory, directory);
 

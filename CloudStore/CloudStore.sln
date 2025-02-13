@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35004.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudStore", "CloudStore.csproj", "{D6FA161B-11D6-4A29-88CC-13C445E36682}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudStore.WebApi", "CloudStore.WebApi.csproj", "{D6FA161B-11D6-4A29-88CC-13C445E36682}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudStore.BL", "..\CloudStore.BL\CloudStore.BL.csproj", "{6047F347-9776-41CC-BA22-074356AAFFCD}"
 EndProject

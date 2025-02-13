@@ -1,4 +1,8 @@
+using CloudStore.BL;
+using CloudStore.BL.BL.Validation;
 using CloudStore.DAL;
+using CloudStore.WebApi.Helpers;
+using System.Security.Cryptography;
 
 namespace CloudStore;
 
@@ -11,7 +15,10 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-        builder.Services.AddTransient<CloudStoreDbHelper>();
+        builder.Services.AddTransient<CSFilesDbHelper>();
+        builder.Services.AddTransient<CSUsersDbHelper>();
+        builder.Services.AddTransient<CloudValidation>();
+        builder.Services.AddTransient<HashHelper>();
 
         var app = builder.Build();
 
@@ -34,9 +41,5 @@ public class Program
         app.MapControllers();
 
         app.Run();
-    }
-    public void Configure(IApplicationBuilder app)
-    {
-        app.UseCors("AllowAll");
     }
 }
