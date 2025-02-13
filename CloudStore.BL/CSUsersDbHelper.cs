@@ -43,4 +43,6 @@ public class CSUsersDbHelper
         _context.Users.Remove(user);
         await _context.SaveChangesAsync();
     }
+    public User? GetUserByApiKey(string apiKey) => 
+        _context.Users.FirstOrDefault(u => u.ApiKey == apiKey);   
 }

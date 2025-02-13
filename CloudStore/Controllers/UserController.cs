@@ -3,6 +3,7 @@ using CloudStore.BL.BL.Validation;
 using CloudStore.BL.Models;
 using CloudStore.WebApi.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Cryptography;
 
 namespace CloudStore.WebApi.Controllers;
 
@@ -29,7 +30,7 @@ public class UserController : ControllerBase
         if (user == null)
             return NotFound($"{login} was not found.");
 
-        if (_hashHelper.ConvertPasswordToHash(password) != user.Password)
+        if (_hashHelper.ConvertStringToHash(password) != user.Password)
             return BadRequest($"{password} is invalid.");
 
         return Ok(user);
@@ -46,16 +47,19 @@ public class UserController : ControllerBase
         if (!_validation.CheckLogin(login) && !_validation.CheckPassword(password))
             return BadRequest($"Login:{login} or password:{password} is not valid!");
 
-        var hashPassword = _hashHelper.ConvertPasswordToHash(password);
+        var hashPassword = _hashHelper.ConvertStringToHash(password);
         var newUser = new User
         {
             Login = login,
             Password = hashPassword
         };
-        newUser.UserDirectory = newUser.Id.ToString();
 
-        await _makeDirectory(newUser.UserDirectory);
-        await _dbContext.CreateUserAsync(newUser);
+        newUser.UserDirectory = newUser.Id.ToString();
+        
+        newUser.ApiKey = _hashHelper.ConvertStringWishShuffleToHash(newUser.Login + newUser.Password);
+
+        Task.WaitAny([_dbContext.CreateUserAsync(newUser)]);
+        await _makeDirectory(newUser.UserDirectory, newUser);
 
         return Ok(user);
     }
@@ -82,10 +86,10 @@ public class UserController : ControllerBase
         return Ok();
     }
 
-    private async Task _makeDirectory(string directory)
+    private async Task _makeDirectory(string directory, User user)
     {
         var client = new HttpClient() { 
-            BaseAddress = new Uri("https://localhost:7157/cloud-store-api/File/") 
+            BaseAddress = new Uri($"https://localhost:7157/cloud-store-api/personal-key:{user.ApiKey}/File/") 
         };
 
         HttpContent content = JsonContent.Create(directory);

@@ -3,6 +3,7 @@ using System;
 using CloudStore.BL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CloudStore.BL.Migrations
 {
     [DbContext(typeof(CloudStoreDbContext))]
-    partial class CloudStoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250213143403_Connection_between_files_and_users")]
+    partial class Connection_between_files_and_users
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,9 +60,6 @@ namespace CloudStore.BL.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<string>("ApiKey")
-                        .HasColumnType("text");
 
                     b.Property<string>("Login")
                         .IsRequired()
