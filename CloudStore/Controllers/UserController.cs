@@ -44,7 +44,7 @@ public class UserController : ControllerBase
             return BadRequest($"{login} is exist.");
 
         if (!_validation.CheckLogin(login) && !_validation.CheckPassword(password))
-            return BadRequest($"Login:{login} or password:{password} is not valid.");
+            return BadRequest($"Login:{login} or password:{password} is not valid!");
 
         var hashPassword = _hashHelper.ConvertPasswordToHash(password);
         var newUser = new User
