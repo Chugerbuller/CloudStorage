@@ -11,6 +11,6 @@ namespace CloudStore.BL.Models
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Login { get; set; }
         public string Password { get; set; }
-        public string UserDirectory { get; set; }
+        public string? UserDirectory { get; set; }
     }
 }

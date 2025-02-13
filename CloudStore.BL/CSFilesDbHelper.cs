@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CloudStore.DAL
 {
-    public class CloudStoreDbHelper
+    public class CSFilesDbHelper
     {
         private readonly CloudStoreDbContext _dbContext;
 
-        public CloudStoreDbHelper()
+        public CSFilesDbHelper()
         {
             _dbContext = new CloudStoreDbContextFactory().CreateDbContext();
         }
