@@ -1,4 +1,5 @@
-﻿using CloudStore.BL.Models;
+﻿using CloudStore.BL.Exceptions;
+using CloudStore.BL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Npgsql.TypeMapping;
@@ -21,6 +22,17 @@ public class CSUsersDbHelper
 
     public async Task<User?> GetUserAsync(string login) =>
         await _context.Users.FirstOrDefaultAsync(x => x.Login == login);
+
+    public async Task<User?> FindUserByLoginAndPassword(string login, string password)
+    {
+        var user = await _context.Users.SingleOrDefaultAsync(u => u.Login == login)
+            ?? throw new LoginException();
+
+        if (user.Password != password)
+            throw new PasswordException();
+
+        return user;
+    }
 
     public async Task CreateUserAsync(User user)
     {
