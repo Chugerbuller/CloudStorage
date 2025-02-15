@@ -3,7 +3,6 @@ using CloudStore.BL.BL.Validation;
 using CloudStore.BL.Models;
 using CloudStore.WebApi.Helpers;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Cryptography;
 
 namespace CloudStore.WebApi.Controllers;
 
@@ -14,54 +13,60 @@ public class UserController : ControllerBase
     private readonly HashHelper _hashHelper;
     private readonly CloudValidation _validation;
     private readonly CSUsersDbHelper _dbContext;
+    private readonly IWebHostEnvironment _webHostEnvironment;
 
-    public UserController(HashHelper hashHelper, CSUsersDbHelper dbContext, CloudValidation validation)
+    public UserController(HashHelper hashHelper, CSUsersDbHelper dbContext, CloudValidation validation,
+                            IWebHostEnvironment webHostEnvironment)
     {
         _hashHelper = hashHelper;
         _dbContext = dbContext;
         _validation = validation;
+        _webHostEnvironment = webHostEnvironment;
     }
 
-    [HttpPost("/user")]
-    public async Task<IActionResult> PostUserAsync(string login, string password)
+    [HttpPost("user")]
+    public async Task<IActionResult> PostUserAsync([FromBody] LoginAndPassword lp)
     {
-        var user = await _dbContext.GetUserAsync(login);
+        var user = await _dbContext.GetUserAsync(lp.Login);
 
         if (user == null)
-            return NotFound($"{login} was not found.");
+            return NotFound($"{lp.Login} was not found.");
 
-        if (_hashHelper.ConvertStringToHash(password) != user.Password)
-            return BadRequest($"{password} is invalid.");
+        if (_hashHelper.ConvertStringToHash(lp.Password) != user.Password)
+            return BadRequest($"{lp.Password} is invalid.");
 
         return Ok(user);
     }
 
-    [HttpPost("/create-user")]
-    public async Task<IActionResult> PostCreateUserAsync(string login, string password)
+    [HttpPost("create-user")]
+    public async Task<IActionResult> PostCreateUserAsync([FromBody] LoginAndPassword lp)
     {
-        var user = await _dbContext.GetUserAsync(login);
+        var user = await _dbContext.GetUserAsync(lp.Login);
 
         if (user != null)
-            return BadRequest($"{login} is exist.");
+            return BadRequest($"{lp.Login} is exist.");
 
-        if (!_validation.CheckLogin(login) && !_validation.CheckPassword(password))
-            return BadRequest($"Login:{login} or password:{password} is not valid!");
+        if (!_validation.CheckLogin(lp.Login) && !_validation.CheckPassword(lp.Password))
+            return BadRequest($"Login:{lp.Login} or password:{lp.Password} is not valid!");
 
-        var hashPassword = _hashHelper.ConvertStringToHash(password);
+        var hashPassword = _hashHelper.ConvertStringToHash(lp.Password);
         var newUser = new User
         {
-            Login = login,
+            Login = lp.Login,
             Password = hashPassword
         };
 
         newUser.UserDirectory = newUser.Id.ToString();
-        
+
         newUser.ApiKey = _hashHelper.ConvertStringWishShuffleToHash(newUser.Login + newUser.Password);
 
         Task.WaitAny([_dbContext.CreateUserAsync(newUser)]);
-        await _makeDirectory(newUser.UserDirectory, newUser);
+        var check = _makeDirectory(newUser.UserDirectory);
 
-        return Ok(user);
+        if (check)
+            return Ok(user);
+
+        return BadRequest();
     }
 
     [HttpPut("update-user")]
@@ -86,14 +91,22 @@ public class UserController : ControllerBase
         return Ok();
     }
 
-    private async Task _makeDirectory(string directory, User user)
+    private bool _makeDirectory(string directory)
     {
-        var client = new HttpClient() { 
-            BaseAddress = new Uri($"https://localhost:7157/cloud-store-api/personal-key:{user.ApiKey}/File/") 
-        };
+        var userDirectory = _webHostEnvironment.ContentRootPath + "\\Files";
+        var path = Path.Combine(userDirectory, directory);
 
-        HttpContent content = JsonContent.Create(directory);
-        var response = await client.PostAsync($"new-directory", content);
-        response.EnsureSuccessStatusCode();
+        if (Directory.Exists(path))
+            return false;
+
+        try
+        {
+            Directory.CreateDirectory(path);
+        }
+        catch (IOException ex)
+        {
+            return false;
+        }
+        return true;
     }
 }

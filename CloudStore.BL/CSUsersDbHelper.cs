@@ -45,4 +45,5 @@ public class CSUsersDbHelper
     }
     public User? GetUserByApiKey(string apiKey) => 
         _context.Users.FirstOrDefault(u => u.ApiKey == apiKey);   
+
 }

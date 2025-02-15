@@ -1,8 +1,8 @@
 using CloudStore.BL;
 using CloudStore.BL.BL.Validation;
 using CloudStore.DAL;
+using CloudStore.WebApi.apiKeyValidation;
 using CloudStore.WebApi.Helpers;
-using System.Security.Cryptography;
 
 namespace CloudStore;
 
@@ -19,6 +19,7 @@ public class Program
         builder.Services.AddTransient<CSUsersDbHelper>();
         builder.Services.AddTransient<CloudValidation>();
         builder.Services.AddTransient<HashHelper>();
+        builder.Services.AddTransient<IApiKeyValidation, ApiKeyValidation>();
 
         var app = builder.Build();
 
@@ -35,8 +36,6 @@ public class Program
         }
 
         app.UseHttpsRedirection();
-
-        app.UseAuthorization();
 
         app.MapControllers();
 

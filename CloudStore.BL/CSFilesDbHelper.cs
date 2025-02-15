@@ -14,11 +14,11 @@ namespace CloudStore.DAL
             _dbContext = new CloudStoreDbContextFactory().CreateDbContext();
         }
 
-        public async Task<IEnumerable<FileModel>> GetAllFilesAsync() =>
-           await _dbContext.Files.ToListAsync();
+        public async Task<IEnumerable<FileModel>> GetAllFilesAsync(User user) =>
+            await _dbContext.Files.Where(f => f.User == user).ToListAsync();
 
-        public async Task<FileModel?> GetFileByIdAsync(int id) =>
-             await _dbContext.Files.SingleOrDefaultAsync(f => f.Id == id);
+        public async Task<FileModel?> GetFileByIdAsync(int id, User user) =>
+             await _dbContext.Files.SingleOrDefaultAsync(f => f.Id == id && f.User == user);
 
         public async Task AddFileAsync(FileModel file)
         {
@@ -41,11 +41,10 @@ namespace CloudStore.DAL
                 throw new NullReferenceException();
         }
 
-        public async Task DeleteFileByIdAsync(int id)
+        public async Task DeleteFileByIdAsync(int id, User user)
         {
-            var temp = _dbContext.Files.FirstOrDefault(f => f.Id == id);
-            if (temp is null)
-                throw new NullReferenceException();
+            var temp = _dbContext.Files.FirstOrDefault(f => f.Id == id && f.User == user)
+                ?? throw new NullReferenceException();
             _dbContext.Files.Remove(temp);
 
             await _dbContext.SaveChangesAsync();
@@ -53,10 +52,8 @@ namespace CloudStore.DAL
 
         public async Task<User?> FindUserByLoginAndPassword(string login, string password)
         {
-            var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Login == login);
-            
-            if (user is null)
-                throw new LoginException();
+            var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Login == login)
+                ?? throw new LoginException();
 
             if (user.Password != password)
                 throw new PasswordException();
@@ -67,6 +64,7 @@ namespace CloudStore.DAL
         public async Task AddNewUserAsync(User user)
         {
             var check = await _dbContext.Users.SingleOrDefaultAsync(u => u.Login == user.Login);
+
             if (check is not null)
                 throw new ExistentLoginException();
 
