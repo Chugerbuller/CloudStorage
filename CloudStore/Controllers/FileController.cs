@@ -2,12 +2,15 @@
 using CloudStore.BL.Models;
 using CloudStore.DAL;
 using CloudStore.WebApi.apiKeyValidation;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection.Metadata.Ecma335;
 
 namespace CloudStore.Controllers;
 
-[Route("cloud-store-api/[controller]")] //personal-key:{apiKey}/
+[Route("cloud-store-api/[controller]")]
 [ApiController]
 public class FileController : ControllerBase
 {
@@ -82,6 +85,38 @@ public class FileController : ControllerBase
             throw new Exception("Not authorized!"); ;
 
         return Ok(await _dbHelper.GetAllFilesAsync(user));
+    }
+
+    [HttpGet("api-key:{apiKey}/all-files-from-directory")]
+    public async Task<IActionResult> GetAllFilesFromDirectory(string apiKey)
+    {
+        if (string.IsNullOrWhiteSpace(apiKey))
+            return BadRequest();
+
+        bool isValid = _apiKeyValidation.IsValidApiKey(apiKey);
+        if (!isValid)
+            return Unauthorized();
+
+        var user = _dbUserHelper.GetUserByApiKey(apiKey);
+
+        return Ok(await _dbHelper.GetAllFilesInDirectory(user, user.UserDirectory));
+    }
+
+    [HttpGet("api-key:{apiKey}/all-files-from-directory/{directory}")]
+    public async Task<IActionResult> GetAllFilesFromDirectory(string apiKey, string directory)
+    {
+        if (string.IsNullOrWhiteSpace(apiKey))
+            return BadRequest();
+
+        bool isValid = _apiKeyValidation.IsValidApiKey(apiKey);
+        if (!isValid)
+            return Unauthorized();
+
+        var user = _dbUserHelper.GetUserByApiKey(apiKey);
+
+        var path = Path.Combine(user.UserDirectory, directory);
+
+        return Ok(await _dbHelper.GetAllFilesInDirectory(user, path));
     }
 
     [HttpPost("api-key:{apiKey}")]
@@ -174,10 +209,11 @@ public class FileController : ControllerBase
 
         if (uploadedFile is null)
             return BadRequest();
-        if (!Directory.Exists(Path.Combine(_userDirectory + directory)))
-            return NotFound("Directory is not exist");
 
-        string path = Path.Combine(_userDirectory, user.UserDirectory);
+        var path = Path.Combine(_userDirectory, user.UserDirectory);
+
+        if (!Directory.Exists(Path.Combine(path, directory)))
+            return NotFound("Directory is not exist");
 
         if (string.IsNullOrEmpty(directory))
             path += "\\" + uploadedFile.FileName;
@@ -192,12 +228,66 @@ public class FileController : ControllerBase
         var newFile = new FileModel
         {
             Name = uploadedFile.FileName,
-            Path = directory + "\\" + uploadedFile.FileName,
+            Path = Path.Combine(user.UserDirectory, directory) + "\\" + uploadedFile.FileName,
             Extension = temp[^1],
             UserId = user.Id
         };
         await _dbHelper.AddFileAsync(newFile);
 
         return Ok("New file is added");
+    }
+
+    [HttpGet("api-key:{apiKey}/scan-directory/{directory}")]
+    public async Task<IActionResult> ScanDirectory(string apiKey, string directory)
+    {
+        if (string.IsNullOrWhiteSpace(apiKey))
+            return BadRequest();
+
+        bool isValid = _apiKeyValidation.IsValidApiKey(apiKey);
+        if (!isValid)
+            return Unauthorized();
+
+        var user = _dbUserHelper.GetUserByApiKey(apiKey);
+
+        var temp = Path.Combine(_userDirectory, user.UserDirectory);
+        var path = Path.Combine(temp, directory);
+
+        if (!Directory.Exists(path))
+            return BadRequest("This directory isn't exist!");
+
+        var absolutPaths = Directory.EnumerateDirectories(path).ToList();
+
+        var res = new List<string>();
+
+        foreach (var p in absolutPaths)
+        {
+            res.Add(Path.GetRelativePath(path, p));
+        }
+
+        return Ok(res);
+    }
+
+    [HttpGet("api-key:{apiKey}/scan-directory")]
+    public async Task<IActionResult> ScanDirectory(string apiKey)
+    {
+        if (string.IsNullOrWhiteSpace(apiKey))
+            return BadRequest();
+
+        bool isValid = _apiKeyValidation.IsValidApiKey(apiKey);
+        if (!isValid)
+            return Unauthorized();
+
+        var user = _dbUserHelper.GetUserByApiKey(apiKey);
+
+        var path = Path.Combine(_userDirectory, user.UserDirectory);
+
+        var absolutPaths = Directory.EnumerateDirectories(path).ToList();
+        var res = new List<string>();
+
+        foreach (var p in absolutPaths)
+        {
+            res.Add(Path.GetRelativePath(path, p));
+        }
+        return Ok(res);
     }
 }
