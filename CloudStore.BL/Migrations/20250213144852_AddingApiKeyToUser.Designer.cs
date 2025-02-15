@@ -3,6 +3,7 @@ using System;
 using CloudStore.BL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CloudStore.BL.Migrations
 {
     [DbContext(typeof(CloudStoreDbContext))]
-    partial class CloudStoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250213144852_AddingApiKeyToUser")]
+    partial class AddingApiKeyToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

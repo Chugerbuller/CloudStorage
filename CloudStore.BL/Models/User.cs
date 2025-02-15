@@ -12,5 +12,7 @@ namespace CloudStore.BL.Models
         public string Login { get; set; }
         public string Password { get; set; }
         public string? UserDirectory { get; set; }
+        public string? ApiKey { get; set; }
+        public ICollection<FileModel> Files { get; set; }
     }
 }
