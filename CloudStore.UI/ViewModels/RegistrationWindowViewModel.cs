@@ -5,14 +5,12 @@ using ReactiveUI.Fody.Helpers;
 
 namespace CloudStore.UI.ViewModels
 {
-    public class LoginWindowViewModel : ViewModelBase
-    {
+	public class RegistrationWindowViewModel : ReactiveObject
+	{
         [Reactive]
         public string Login { get; set; }
 
         [Reactive]
         public string Password { get; set; }
-        [Reactive]
-        public bool RememberMe { get; set; }
     }
 }

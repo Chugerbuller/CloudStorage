@@ -13,6 +13,6 @@
     <Application.Styles>
         <StyleInclude Source="avares://Citrus.Avalonia/Citrus.xaml" />
 
-        <StyleInclude Source="avares://Citrus.Avalonia/Rust.xaml" />
+        <StyleInclude Source="avares://Citrus.Avalonia/Magma.xaml" />
     </Application.Styles>
 </Application>

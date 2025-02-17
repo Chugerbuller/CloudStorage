@@ -1,0 +1,55 @@
+<Window
+    x:Class="CloudStore.UI.RegistrationWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:CloudStore.UI.ViewModels"
+    Title="Окно регистрации"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+	Width="800"
+	Height="600"
+    x:DataType="vm:RegistrationWindowViewModel"
+    Icon="/Assets/avalonia-logo.ico"
+    mc:Ignorable="d">
+    <Design.DataContext>
+        <vm:RegistrationWindowViewModel />
+    </Design.DataContext>
+	<Border
+			Width="550"
+            Margin="10"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Classes="Card">
+		<StackPanel Orientation="Vertical">
+			<TextBlock
+				Margin="10,20,10,20"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Center"
+				Classes="Heading"
+				Text="Регистрация" />
+			<TextBox
+				 Margin="10,20,10,20"
+				Text="{Binding Login, Mode=TwoWay}"
+				UseFloatingWatermark="True"
+				Watermark="Введите логин" />
+			<TextBox
+				 Margin="10,20,10,20"
+				PasswordChar="*"
+				Text="{Binding Password, Mode=TwoWay}"
+				UseFloatingWatermark="True"
+				Watermark="Введите пароль" />
+			<TextBox
+				 Margin="10,20,10,20"
+				PasswordChar="*"
+				Text="{Binding Password, Mode=TwoWay}"
+				UseFloatingWatermark="True"
+				Watermark="Повторите пароль" />
+			<Button Content="Зарегистрироваться"
+					Margin="100,20,10,0"
+					HorizontalAlignment="Right"/>
+
+		</StackPanel>
+	</Border>
+</Window>
