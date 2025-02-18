@@ -1,0 +1,152 @@
+<Window
+    x:Class="CloudStore.UI.LoginAndRegistrationWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:CloudStore.UI.ViewModels"
+    Title="LoginAndRegistrationWindow"
+    Width="1000"
+    Height="800"
+    MinWidth="1000"
+    MinHeight="800"
+    x:DataType="vm:LoginAndRegistrationViewModel"
+    Icon="/Assets/avalonia-logo.ico"
+    mc:Ignorable="d">
+    <Design.DataContext>
+        <vm:LoginAndRegistrationViewModel />
+    </Design.DataContext>
+    <Border
+        Width="900"
+        Height="600"
+        Classes="Card">
+        <StackPanel Margin="15" Orientation="Horizontal">
+            <Border
+                Width="400"
+                Height="400"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                BorderBrush="LightGray"
+                BorderThickness="2"
+                Classes="Card">
+                <Grid>
+                    <Border
+                        Margin="-20"
+                        Background="rgba(100,0,200,50)"
+                        BorderBrush="LightGray"
+                        BorderThickness="0.5"
+                        Classes="Card"
+                        IsVisible="{Binding !LoginPartVisibility}" />
+                    <StackPanel IsVisible="{Binding LoginPartVisibility}" Orientation="Vertical">
+                        <TextBlock
+                            Margin="10,10,10,10"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Classes="Heading"
+                            Text="Авторизация" />
+                        <TextBox
+                            Margin="10,10,10,0"
+                            Text="{Binding Login, Mode=TwoWay}"
+                            UseFloatingWatermark="True"
+                            Watermark="Введите логин" />
+                        <TextBox
+                            Margin="10,20,10,10"
+                            PasswordChar="*"
+                            Text="{Binding Password, Mode=TwoWay}"
+                            UseFloatingWatermark="True"
+                            Watermark="Введите Пароль" />
+                        <StackPanel Margin="10,0,10,10" Orientation="Horizontal">
+                            <ToggleButton
+                                Width="20"
+                                Height="20"
+                                Margin="0,0,10,0"
+                                CornerRadius="20"
+                                IsChecked="{Binding RememberMe}" />
+                            <Label Content="запомнить меня" />
+                        </StackPanel>
+
+                        <Button
+                            Width="200"
+                            Margin="80,20,80,0"
+                            HorizontalAlignment="Center"
+                            Content="Авторизоваться">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover">
+                                    <Setter Property="Background" Value="rgb(250,100,100)" />
+                                </Style>
+                            </Button.Styles>
+                        </Button>
+                        <Button
+                            Width="200"
+                            Margin="80,20,80,0"
+                            HorizontalAlignment="Center"
+                            Command="{Binding AutorizationCommand}"
+                            Content="Зарегистрироваться">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover">
+                                    <Setter Property="Background" Value="rgb(250,100,100)" />
+                                </Style>
+                            </Button.Styles>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border
+                Width="400"
+                Height="400"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                BorderBrush="LightGray"
+                BorderThickness="2"
+                Classes="Card">
+                <Grid>
+                    <Border
+                        Margin="-20"
+                        Background="rgba(100,0,200,50)"
+                        BorderBrush="LightGray"
+                        BorderThickness="0.5"
+                        Classes="Card"
+                        IsVisible="{Binding !RegistrationPartVisibility}" />
+                    <StackPanel IsVisible="{Binding RegistrationPartVisibility}" Orientation="Vertical">
+                        <TextBlock
+                            Margin="10,20,10,20"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Classes="Heading"
+                            Text="Регистрация" />
+                        <TextBox
+                            Margin="10,20,10,0"
+                            Text="{Binding LoginRegistration, Mode=TwoWay}"
+                            UseFloatingWatermark="True"
+                            Watermark="Введите логин" />
+                        <TextBox
+                            Margin="10,20,10,0"
+                            PasswordChar="*"
+                            Text="{Binding PasswordRegistration, Mode=TwoWay}"
+                            UseFloatingWatermark="True"
+                            Watermark="Введите пароль" />
+                        <TextBox
+                            Margin="10,20,10,10"
+                            PasswordChar="*"
+                            Text="{Binding PasswordRegistrationRepeat, Mode=TwoWay}"
+                            UseFloatingWatermark="True"
+                            Watermark="Повторите пароль" />
+                        <Button
+                            Width="200"
+                            Margin="80,20,80,0"
+                            HorizontalAlignment="Center"
+                            Command="{Binding RegistrationCommand}"
+                            Content="Зарегистрироваться">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover">
+                                    <Setter Property="Background" Value="rgb(250,100,100)" />
+                                </Style>
+                            </Button.Styles>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </Border>
+</Window>
