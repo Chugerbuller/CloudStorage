@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace CloudStore.UI;
 
-public partial class LoginWindow : Window
+public partial class LoginAndRegistrationWindow : Window
 {
-    public LoginWindow()
+    public LoginAndRegistrationWindow()
     {
         InitializeComponent();
     }

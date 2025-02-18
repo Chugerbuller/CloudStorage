@@ -44,7 +44,7 @@ public class UserController : ControllerBase
         var user = await _dbContext.GetUserAsync(lp.Login);
 
         if (user != null)
-            return BadRequest($"{lp.Login} is exist.");
+            return Conflict($"{lp.Login} is exist.");
 
         if (!_validation.CheckLogin(lp.Login) && !_validation.CheckPassword(lp.Password))
             return BadRequest($"Login:{lp.Login} or password:{lp.Password} is not valid!");

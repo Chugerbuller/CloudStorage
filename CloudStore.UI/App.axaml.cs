@@ -17,9 +17,9 @@ namespace CloudStore.UI
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new LoginWindow
+                desktop.MainWindow = new LoginAndRegistrationWindow
                 {
-                    DataContext = new LoginWindowViewModel(),
+                    DataContext = new LoginAndRegistrationViewModel(),
                 };
             }
 
