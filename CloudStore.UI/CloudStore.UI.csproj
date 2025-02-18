@@ -24,4 +24,8 @@
     <PackageReference Include="Citrus.Avalonia" Version="2.1.1" />
     <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CloudStore.BL\CloudStore.BL.csproj" />
+  </ItemGroup>
 </Project>

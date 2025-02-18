@@ -48,7 +48,7 @@
                             Margin="10,10,10,0"
                             Text="{Binding Login, Mode=TwoWay}"
                             UseFloatingWatermark="True"
-                            Watermark="Введите логин" />
+                            Watermark="{Binding WatermarkLogin}" />
                         <TextBox
                             Margin="10,20,10,10"
                             PasswordChar="*"
@@ -69,7 +69,9 @@
                             Width="200"
                             Margin="80,20,80,0"
                             HorizontalAlignment="Center"
+                            Command="{Binding AuthorizationCommand}"
                             Content="Авторизоваться">
+
                             <Button.Styles>
                                 <Style Selector="Button:pointerover">
                                     <Setter Property="Background" Value="rgb(250,100,100)" />
@@ -80,7 +82,7 @@
                             Width="200"
                             Margin="80,20,80,0"
                             HorizontalAlignment="Center"
-                            Command="{Binding AutorizationCommand}"
+                            Command="{Binding RegistrationCommand}"
                             Content="Зарегистрироваться">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover">
@@ -125,7 +127,7 @@
                             PasswordChar="*"
                             Text="{Binding PasswordRegistration, Mode=TwoWay}"
                             UseFloatingWatermark="True"
-                            Watermark="Введите пароль" />
+                            Watermark="{Binding WatermarkPasswordReg}" />
                         <TextBox
                             Margin="10,20,10,10"
                             PasswordChar="*"
@@ -136,7 +138,7 @@
                             Width="200"
                             Margin="80,20,80,0"
                             HorizontalAlignment="Center"
-                            Command="{Binding RegistrationCommand}"
+                            Command="{Binding RegistrationUserCommand}"
                             Content="Зарегистрироваться">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover">
