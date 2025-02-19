@@ -24,7 +24,7 @@ public class UserController : ControllerBase
         _webHostEnvironment = webHostEnvironment;
     }
 
-    [HttpPost("user")]
+    [HttpPost("authorize-user")]
     public async Task<IActionResult> AuthorizeUser([FromBody] LoginAndPassword lp)
     {
         var user = await _dbContext.GetUserAsync(lp.Login);
