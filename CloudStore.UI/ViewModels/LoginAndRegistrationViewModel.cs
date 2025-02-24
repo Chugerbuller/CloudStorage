@@ -1,7 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reactive;
 using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Input;
+using CloudStore.BL.Models;
 using CloudStore.UI.Exceptions;
 using CloudStore.UI.Services;
 using ReactiveUI;
@@ -9,9 +14,11 @@ using ReactiveUI.Fody.Helpers;
 
 namespace CloudStore.UI.ViewModels;
 
-public class LoginAndRegistrationViewModel : ViewModelBase
+public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
 {
     private readonly ApiUserService _userService;
+
+    #region ReactiveProps
 
     [Reactive]
     public bool LoginPartVisibility { get; set; } = true;
@@ -43,9 +50,18 @@ public class LoginAndRegistrationViewModel : ViewModelBase
     [Reactive]
     public string WatermarkPasswordReg { get; set; } = "Введите пароль";
 
+    #endregion ReactiveProps
+
+    #region ReactiveCommands
+
     public ReactiveCommand<Unit, Unit> AuthorizationCommand { get; }
     public ReactiveCommand<Unit, Unit> RegistrationCommand { get; }
     public ReactiveCommand<Unit, Unit> RegistrationUserCommand { get; }
+
+    #endregion ReactiveCommands
+
+    public event EventHandler? Closed;
+    public User? User { get; private set; }
 
     public LoginAndRegistrationViewModel()
     {
@@ -65,12 +81,9 @@ public class LoginAndRegistrationViewModel : ViewModelBase
             return;
         try
         {
-            var user = await _userService.AuthorizeUser(Login, Password);
-            if (user is not null)
-            {
-                LoginPartVisibility = !LoginPartVisibility;
-                RegistrationPartVisibility = !RegistrationPartVisibility;
-            }
+            User = await _userService.AuthorizeUser(Login, Password);
+            if (User is not null)
+                Closed(this, new EventArgs());
         }
         catch (ExistentLoginException)
         {
@@ -91,15 +104,13 @@ public class LoginAndRegistrationViewModel : ViewModelBase
         if (PasswordRegistration != PasswordRegistrationRepeat)
         {
             WatermarkPasswordReg = "Пароли должны совпадать";
+            return;
         }
         try
         {
-            var user = await _userService.RegistrationUser(LoginRegistration, PasswordRegistration);
-            if (user is not null)
-            {
-                LoginPartVisibility = !LoginPartVisibility;
-                RegistrationPartVisibility = !RegistrationPartVisibility;
-            }
+            User = await _userService.RegistrationUser(LoginRegistration, PasswordRegistration);
+            if (User is not null)
+                Closed(this, new EventArgs());
         }
         catch (ExistentLoginException)
         {
@@ -107,7 +118,7 @@ public class LoginAndRegistrationViewModel : ViewModelBase
         }
         catch (NotValidException)
         {
-            WatermarkPasswordReg = "невалидный пароль";
+            WatermarkPasswordReg = "Невалидный пароль";
         }
     }
 }

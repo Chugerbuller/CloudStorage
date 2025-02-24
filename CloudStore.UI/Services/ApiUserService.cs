@@ -16,7 +16,7 @@ namespace CloudStore.UI.Services
         {
             _httpClient = new HttpClient()
             {
-                BaseAddress = new Uri("http://localhost:5000/cloud-store-api/User/")
+                BaseAddress = new Uri("http://localhost:5108/cloud-store-api/User/")
             };
         }
         public async Task<User?> RegistrationUser(string login, string password)
@@ -37,7 +37,7 @@ namespace CloudStore.UI.Services
         }
         public async Task<User?> AuthorizeUser(string login, string password)
         {
-            var res = await _httpClient.PostAsJsonAsync("user", new LoginAndPassword
+            var res = await _httpClient.PostAsJsonAsync("authorize-user", new LoginAndPassword
             {
                 Login = login,
                 Password = password

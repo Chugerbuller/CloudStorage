@@ -24,7 +24,7 @@ public class UserController : ControllerBase
         _webHostEnvironment = webHostEnvironment;
     }
 
-    [HttpPost("user")]
+    [HttpPost("authorize-user")]
     public async Task<IActionResult> PostUserAsync([FromBody] LoginAndPassword lp)
     {
         var user = await _dbContext.GetUserAsync(lp.Login);
@@ -60,11 +60,12 @@ public class UserController : ControllerBase
 
         newUser.ApiKey = _hashHelper.ConvertStringWishShuffleToHash(newUser.Login + newUser.Password);
 
-        Task.WaitAny([_dbContext.CreateUserAsync(newUser)]);
+        await _dbContext.CreateUserAsync(newUser);
+         
         var check = _makeDirectory(newUser.UserDirectory);
 
         if (check)
-            return Ok(user);
+            return Ok(newUser);
 
         return BadRequest();
     }
@@ -103,7 +104,7 @@ public class UserController : ControllerBase
         {
             Directory.CreateDirectory(path);
         }
-        catch (IOException ex)
+        catch (IOException)
         {
             return false;
         }
