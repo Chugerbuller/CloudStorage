@@ -10,28 +10,14 @@ namespace CloudStore.UI.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase, ICloseable
     {
-        [Reactive]
-        public string Greeting { get; set; }
+        public ReactiveCommand<Unit, Unit> CommandCloseWindow { get; }
 
-        public ReactiveCommand<Unit, Unit> CommandTest { get; }
-
-        public event EventHandler? Closed;
-
-        private User? _user;
-        public User? User
-        {
-            get => _user;
-            set 
-            { 
-                _user = value;
-                Greeting = _user.Login;
-            }
-        }
-
+        public event EventHandler? Closed;        
+        public User? User { get; set; }
         public MainWindowViewModel(User? user)
         {
-            _user = user;
-            CommandTest = ReactiveCommand.Create(() => Closed(this, new EventArgs()));
+            User = user;
+            CommandCloseWindow = ReactiveCommand.Create(() => Closed(this, new EventArgs()));
         }
     }
 }

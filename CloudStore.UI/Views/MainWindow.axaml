@@ -6,20 +6,54 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:CloudStore.UI.ViewModels"
     Title="CloudStore.UI"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    MinWidth="800"
+    MinHeight="600"
     x:DataType="vm:MainWindowViewModel"
+    Background="White"
     Icon="/Assets/avalonia-logo.ico"
     mc:Ignorable="d">
 
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
-	<Grid>
-		<ListBox>
-			
-		</ListBox>
-	</Grid>
-
-
+    <Grid
+        Margin="10"
+        ColumnDefinitions="8*,*"
+        RowDefinitions="0.5*,6*"
+        ShowGridLines="False">
+        <Border
+            Margin="10"
+            Padding="5,0,5,0"
+            BorderBrush="rgba(100,0,200,50)"
+            BorderThickness="1"
+            CornerRadius="3">
+            <Grid ColumnDefinitions="*,30*">
+                <Button />
+                <TextBlock Grid.Row="0" Grid.Column="0" />
+            </Grid>
+        </Border>
+        <Border
+            Grid.Row="1"
+            Grid.Column="0"
+            Margin="10"
+            BorderBrush="rgba(100,0,200,50)"
+            BorderThickness="1"
+            Classes="Card"
+            CornerRadius="3">
+            <ListBox>
+                <ListBoxItem />
+            </ListBox>
+        </Border>
+        <StackPanel
+            Grid.Row="1"
+            Grid.Column="1"
+            Margin="10"
+            Orientation="Vertical">
+            <Button />
+            <Button />
+            <Button />
+            <Button />
+        </StackPanel>
+        <Label Grid.Row="0" Grid.Column="1" />
+    </Grid>
 </Window>

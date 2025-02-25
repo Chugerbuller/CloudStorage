@@ -197,8 +197,7 @@ public class FileController : ControllerBase
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
 
-        bool isValid = _apiKeyValidation.IsValidApiKey(apiKey); //FIX ME put method in if case
-        if (!isValid)
+        if (!_apiKeyValidation.IsValidApiKey(apiKey))
             return Unauthorized();
 
         var user = _dbUserHelper.GetUserByApiKey(apiKey);
@@ -208,7 +207,7 @@ public class FileController : ControllerBase
 
         var path = Path.Combine(_userDirectory, user.UserDirectory);
 
-        if (!Directory.Exists(Path.Combine(path, directory))) //FIX ME add if directory = ""
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(Path.Combine(path, directory)))
             return NotFound("Directory is not exist");
 
         if (string.IsNullOrEmpty(directory))
@@ -219,7 +218,7 @@ public class FileController : ControllerBase
         using var fs = new FileStream(path, FileMode.Create);
         await uploadedFile.CopyToAsync(fs);
 
-        var extension = uploadedFile.FileName.Split('.')[^1]; 
+        var extension = uploadedFile.FileName.Split('.')[^1];
 
         var newFile = new FileModel
         {
@@ -279,9 +278,8 @@ public class FileController : ControllerBase
         var res = new List<string>();
 
         foreach (var p in absolutPaths)
-        {
             res.Add(Path.GetRelativePath(path, p));
-        }
+
         return Ok(res);
     }
 }
