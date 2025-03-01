@@ -1,4 +1,4 @@
-﻿using CloudStore.BL;
+using CloudStore.BL;
 using CloudStore.BL.BL.Validation;
 using CloudStore.BL.Models;
 using CloudStore.WebApi.Helpers;
@@ -25,7 +25,8 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("authorize-user")]
-    public async Task<IActionResult> PostUserAsync([FromBody] LoginAndPassword lp)
+
+    public async Task<IActionResult> AuthorizeUser([FromBody] LoginAndPassword lp)
     {
         var user = await _dbContext.GetUserAsync(lp.Login);
 
@@ -39,7 +40,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("create-user")]
-    public async Task<IActionResult> PostCreateUserAsync([FromBody] LoginAndPassword lp)
+    public async Task<IActionResult> CreateUserAsync([FromBody] LoginAndPassword lp)
     {
         var user = await _dbContext.GetUserAsync(lp.Login);
 
