@@ -111,8 +111,9 @@ public class FileController : ControllerBase
             return Unauthorized();
 
         var user = _dbUserHelper.GetUserByApiKey(apiKey);
+        var userDir = Path.Combine(_userDirectory, user.UserDirectory);
 
-        var path = Path.Combine(user.UserDirectory, directory);
+        var path = Path.Combine(userDir, directory);
 
         return Ok(await _dbHelper.GetAllFilesInDirectory(user, path));
     }
