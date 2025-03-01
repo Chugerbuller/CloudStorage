@@ -66,7 +66,7 @@ public class FileController : ControllerBase
         return Ok(await _dbHelper.GetFileByIdAsync(id, user));
     }
 
-    [HttpGet("api-key:{apiKey}/AllFiles")]
+    [HttpGet("api-key:{apiKey}/all-files")]
     public async Task<IActionResult> GetAllFilesAsync(string apiKey)
     {
         if (string.IsNullOrWhiteSpace(apiKey))

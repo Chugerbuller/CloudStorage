@@ -18,6 +18,8 @@ namespace CloudStore.BL
         public CloudStoreDbContext(string connectionString)
         {
             _connectionString = connectionString;
+            Users.Load();
+            Files.Load();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

@@ -2,6 +2,7 @@
 using CloudStore.UI.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -31,25 +32,33 @@ public class ApiFileService
         var res = new List<CloudStoreUiListItem>();
         List<FileForList> files;
         List<DirectoryForList> directorys;
+        try
+        {
+            var rawFiles = await _httpClient.GetFromJsonAsync<IEnumerable<FileModel>>($"api-key:{_user.ApiKey}/all-files-from-directory");
+
+            if (rawFiles == null)
+                files = null;
+            else
+                files = rawFiles.Select(f => new FileForList(f)).ToList();
+
+            var rawDirectorys = await _httpClient.GetFromJsonAsync<IEnumerable<string>>($"api-key:{_user.ApiKey}/scan-directory");
+
+            if (rawDirectorys == null)
+                directorys = null;
+            else
+                directorys = rawDirectorys.Select(d => new DirectoryForList(d)).ToList();
+
+            res.AddRange(directorys);
+            res.AddRange(files);
+
+            return res;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return null;
+        }
        
-        var rawFiles = await _httpClient.GetFromJsonAsync<IEnumerable<FileModel>>($"api-key:{_user.ApiKey}/all-files-from-directory");
-
-        if (rawFiles == null)
-            files = null;
-        else
-            files = rawFiles.Select(f => new FileForList(f)).ToList();
-
-        var rawDirectorys = await _httpClient.GetFromJsonAsync<IEnumerable<string>>($"api-key:{_user.ApiKey}/scan-directory");
-
-        if (rawDirectorys == null)
-            directorys = null;
-        else
-            directorys = rawDirectorys.Select(d => new DirectoryForList(d)).ToList();
-
-        res.AddRange(directorys);
-        res.AddRange(files);
-
-        return res;
     }
 
     public async Task<List<CloudStoreUiListItem>?> GetItemsFromDirectory(string directory)

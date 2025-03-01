@@ -29,7 +29,7 @@ namespace CloudStore.UI.Services
             });
             return res.StatusCode switch
             {
-                HttpStatusCode.OK => await res.Content.ReadFromJsonAsync<User>(),
+                HttpStatusCode.OK => await res.Content.ReadFromJsonAsync<User>(), 
                 HttpStatusCode.Conflict => throw new ExistentLoginException(),
                 HttpStatusCode.BadRequest => throw new NotValidException(),
                 _ => null,
@@ -51,5 +51,6 @@ namespace CloudStore.UI.Services
                 _ => null,
             };
         }
+
     }
 }
