@@ -78,7 +78,7 @@ public class FileController : ControllerBase
 
         var user = _dbUserHelper.GetUserByApiKey(apiKey);
         if (user is null)
-            throw new Exception("Not authorized!"); ;
+            throw new Exception("Not authorized!");
 
         return Ok(await _dbHelper.GetAllFilesAsync(user));
     }

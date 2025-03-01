@@ -21,24 +21,24 @@ public class ApiFileService
         _user = user;
         _httpClient = new HttpClient()
         {
-            BaseAddress = new Uri("http://localhost:5108/cloud-store-api/File")
+            BaseAddress = new Uri("https://localhost:7157/cloud-store-api/File")
         };
-        _httpClient.DefaultRequestHeaders.Add("X-API-Key", _user.ApiKey);
         _webClient = new WebClient();
     }
 
-    public async Task<List<CloudStoreUiListItem>?> GetStartingScreenItems()
+    public async Task<List<CloudStoreUiListItem>?> GetStartingScreenItems() //Fix me "api-key" scheme is not supported чзх ваще
     {
         var res = new List<CloudStoreUiListItem>();
         List<FileForList> files;
         List<DirectoryForList> directorys;
-
+       
         var rawFiles = await _httpClient.GetFromJsonAsync<IEnumerable<FileModel>>($"api-key:{_user.ApiKey}/all-files-from-directory");
 
         if (rawFiles == null)
             files = null;
         else
             files = rawFiles.Select(f => new FileForList(f)).ToList();
+
         var rawDirectorys = await _httpClient.GetFromJsonAsync<IEnumerable<string>>($"api-key:{_user.ApiKey}/scan-directory");
 
         if (rawDirectorys == null)
