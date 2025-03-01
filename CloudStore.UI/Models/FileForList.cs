@@ -9,7 +9,7 @@ namespace CloudStore.UI.Models
 {
     public class FileForList : CloudStoreUiListItem
     {
-        public FileForList(FileModel file)
+        public FileForList(FileModel file) : base(file.Name, ItemType.File, file.Extension)
         {
             File = file;
         }

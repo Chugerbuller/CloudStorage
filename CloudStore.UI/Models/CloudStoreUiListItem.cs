@@ -11,10 +11,19 @@ namespace CloudStore.UI.Models
         Directory,
         File
     }
-    public abstract class CloudStoreUiListItem
+    public class CloudStoreUiListItem
     {
+        public CloudStoreUiListItem(string name, ItemType type, string extension)
+        {
+            Name = name;
+            if (type == ItemType.Directory)
+                Type = "Directory";
+            else
+                Type = "File";
+            Extension = extension;
+        }
         public string Name { get; set; }
-        public ItemType Type { get; }
+        public string Type { get; }
         public string Extension { get; }
     }
 }

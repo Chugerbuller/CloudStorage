@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Input;
 using CloudStore.BL.Models;
 using CloudStore.UI.Exceptions;
+using CloudStore.UI.Models;
 using CloudStore.UI.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -58,6 +60,7 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
 
     public event EventHandler? Closed;
     public User? User { get; private set; }
+    public List<CloudStoreUiListItem>? Items { get; set; }
 
     public LoginAndRegistrationViewModel()
     {
@@ -79,7 +82,11 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
         {
             User = await _userService.AuthorizeUser(Login, Password);
             if (User is not null)
+            {
+                var temp = new ApiFileService(User);
+                Items = await temp.GetStartingScreenItems(); //Fix me Почему это работает
                 Closed(this, new EventArgs());
+            }
         }
         catch (ExistentLoginException)
         {
@@ -105,8 +112,14 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
         try
         {
             User = await _userService.RegistrationUser(LoginRegistration, PasswordRegistration);
+           
             if (User is not null)
+            {
+                var temp = new ApiFileService(User);
+                Items = await temp.GetStartingScreenItems();  //Fix me Почему это работает
                 Closed(this, new EventArgs());
+            }
+                
         }
         catch (ExistentLoginException)
         {

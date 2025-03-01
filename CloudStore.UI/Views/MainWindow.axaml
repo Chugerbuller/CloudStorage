@@ -50,10 +50,15 @@
             <ListBox ItemsSource="{Binding FilesAndDirectorys}" SelectedItem="{Binding SelectedFileOrDirectory}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Vertical">
-                            <Label Content="{Binding Extension}" />
-                            <TextBlock Text="{Binding Name}" />
-                        </StackPanel>
+                        <Border
+                            BorderBrush="rgba(100,0,200,50)"
+                            BorderThickness="1"
+                            Classes="Card">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock HorizontalAlignment="Left" Text="{Binding Extension}" />
+                                <TextBlock HorizontalAlignment="Right" Text="{Binding Name}" />
+                            </StackPanel>
+                        </Border>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

@@ -9,7 +9,7 @@ namespace CloudStore.UI.Models
 {
     public class DirectoryForList : CloudStoreUiListItem
     {
-        public DirectoryForList(string directory)
+        public DirectoryForList(string directory) : base(directory, ItemType.Directory, "")
         {
             Directory = directory;
         }

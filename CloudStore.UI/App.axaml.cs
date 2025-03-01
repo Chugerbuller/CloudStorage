@@ -30,7 +30,7 @@ namespace CloudStore.UI
                 vm.Closed += (s, e) =>
                 {
                     Debug.WriteLine("start main Window");
-                    var mwvm = new MainWindowViewModel(vm.User);
+                    var mwvm = new MainWindowViewModel(vm.User, vm.Items);
                     win.Hide();
 
                     win = desktop.MainWindow = new MainWindow
