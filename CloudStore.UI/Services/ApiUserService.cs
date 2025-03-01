@@ -27,6 +27,7 @@ namespace CloudStore.UI.Services
                 Login = login,
                 Password = password
             });
+            _httpClient.Dispose();
             return res.StatusCode switch
             {
                 HttpStatusCode.OK => await res.Content.ReadFromJsonAsync<User>(), 
@@ -43,6 +44,7 @@ namespace CloudStore.UI.Services
                 Login = login,
                 Password = password
             });
+            _httpClient.Dispose();
             return res.StatusCode switch
             {
                 HttpStatusCode.OK => await res.Content.ReadFromJsonAsync<User>(),

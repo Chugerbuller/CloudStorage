@@ -17,7 +17,8 @@ namespace CloudStore.UI.ViewModels
         public ReactiveCommand<Unit, Unit> CommandCloseWindow { get; }
 
         public ObservableCollection<CloudStoreUiListItem?> FilesAndDirectorys { get; set; } = [];
-
+        [Reactive]
+        public string UserPath { get; set; }
         [Reactive]
         public CloudStoreUiListItem SelectedFileOrDirectory { get; set; }
 
@@ -29,11 +30,11 @@ namespace CloudStore.UI.ViewModels
         {
             User = user;
             CommandCloseWindow = ReactiveCommand.Create(() => Closed(this, new EventArgs()));
-
+            UserPath = @"\";
            if (User != null)
             {
                 _apiFileService = new(User);
-                FilesAndDirectorys.AddRange(_apiFileService.GetStartingScreenItems().Result);
+                //FilesAndDirectorys.AddRange(_apiFileService.GetStartingScreenItems().Result!);
             }
             else
                 FilesAndDirectorys = new();

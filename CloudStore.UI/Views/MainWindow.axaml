@@ -29,11 +29,14 @@
             CornerRadius="3">
             <Grid ColumnDefinitions="*,30*">
                 <Button
-                    Grid.Row="0"
                     Grid.Column="0"
                     Padding="0"
                     Content="..." />
-                <TextBlock Grid.Row="0" Grid.Column="0" />
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="10,0,0,0"
+                    VerticalAlignment="Center"
+                    Text="{Binding UserPath, Mode=OneWay}" />
             </Grid>
         </Border>
         <Border
@@ -60,11 +63,16 @@
             Grid.Column="1"
             Margin="10"
             Orientation="Vertical">
-            <Button />
-            <Button />
-            <Button />
-            <Button />
+            <Button Content="Добавить файл" />
+            <Button Content="Удалить файл" />
+            <Button Content="Создать папку" />
+
         </StackPanel>
-        <Label Grid.Row="0" Grid.Column="1" />
+        <Label
+            Grid.Row="0"
+            Grid.Column="1"
+            HorizontalContentAlignment="Center"
+            VerticalContentAlignment="Center"
+            Content="{Binding User.Login}" />
     </Grid>
 </Window>

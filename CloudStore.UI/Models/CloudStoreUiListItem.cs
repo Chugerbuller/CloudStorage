@@ -11,7 +11,7 @@ namespace CloudStore.UI.Models
         Directory,
         File
     }
-    public class CloudStoreUiListItem
+    public abstract class CloudStoreUiListItem
     {
         public string Name { get; set; }
         public ItemType Type { get; }

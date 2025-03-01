@@ -22,43 +22,35 @@ public class ApiFileService
         _user = user;
         _httpClient = new HttpClient()
         {
-            BaseAddress = new Uri("https://localhost:7157/cloud-store-api/File")
+            BaseAddress = new Uri("https://localhost:7157/cloud-store-api/File/")
         };
         _webClient = new WebClient();
     }
 
-    public async Task<List<CloudStoreUiListItem>?> GetStartingScreenItems() //Fix me "api-key" scheme is not supported чзх ваще
+    public async Task<List<CloudStoreUiListItem>?> GetStartingScreenItems()
     {
         var res = new List<CloudStoreUiListItem>();
-        List<FileForList> files;
-        List<DirectoryForList> directorys;
-        try
-        {
-            var rawFiles = await _httpClient.GetFromJsonAsync<IEnumerable<FileModel>>($"api-key:{_user.ApiKey}/all-files-from-directory");
+        List<FileForList>? files;
+        List<DirectoryForList>? directorys;
+        //Fix me "api-key" scheme is not supported
+        var rawFiles = await _httpClient.GetFromJsonAsync<IEnumerable<FileModel>>($"api-key:{_user.ApiKey}/all-files-from-directory");
 
-            if (rawFiles == null)
-                files = null;
-            else
-                files = rawFiles.Select(f => new FileForList(f)).ToList();
+        if (rawFiles == null)
+            files = null;
+        else
+            files = rawFiles.Select(f => new FileForList(f)).ToList();
 
-            var rawDirectorys = await _httpClient.GetFromJsonAsync<IEnumerable<string>>($"api-key:{_user.ApiKey}/scan-directory");
+        var rawDirectorys = await _httpClient.GetFromJsonAsync<IEnumerable<string>>($"api-key:{_user.ApiKey}/scan-directory");
 
-            if (rawDirectorys == null)
-                directorys = null;
-            else
-                directorys = rawDirectorys.Select(d => new DirectoryForList(d)).ToList();
+        if (rawDirectorys == null)
+            directorys = null;
+        else
+            directorys = rawDirectorys.Select(d => new DirectoryForList(d)).ToList();
 
-            res.AddRange(directorys);
-            res.AddRange(files);
+        res.AddRange(directorys);
+        res.AddRange(files);
 
-            return res;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex.Message);
-            return null;
-        }
-       
+        return res;
     }
 
     public async Task<List<CloudStoreUiListItem>?> GetItemsFromDirectory(string directory)
