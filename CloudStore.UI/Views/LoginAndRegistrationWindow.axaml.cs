@@ -9,5 +9,7 @@ public partial class LoginAndRegistrationWindow : Window
     public LoginAndRegistrationWindow()
     {
         InitializeComponent();
+        
     }
+
 }

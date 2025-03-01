@@ -1,8 +1,10 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform;
 using CloudStore.UI.ViewModels;
 using CloudStore.UI.Views;
+using System.Diagnostics;
 
 namespace CloudStore.UI
 {
@@ -15,12 +17,29 @@ namespace CloudStore.UI
 
         public override void OnFrameworkInitializationCompleted()
         {
+            //FIX ME
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new LoginAndRegistrationWindow
+                var vm = new LoginAndRegistrationViewModel();
+
+                var win = desktop.MainWindow = new LoginAndRegistrationWindow
                 {
-                    DataContext = new LoginAndRegistrationViewModel(),
+                    DataContext = vm,
                 };
+
+                vm.Closed += (s, e) =>
+                {
+                    Debug.WriteLine("start main Window");
+                    var mwvm = new MainWindowViewModel(vm.User, vm.Items);
+                    win.Hide();
+
+                    win = desktop.MainWindow = new MainWindow
+                    {
+                        DataContext = mwvm
+                    };
+                    win.Show();
+                };
+               
             }
 
             base.OnFrameworkInitializationCompleted();

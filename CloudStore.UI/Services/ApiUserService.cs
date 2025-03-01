@@ -16,32 +16,35 @@ namespace CloudStore.UI.Services
         {
             _httpClient = new HttpClient()
             {
-                BaseAddress = new Uri("http://localhost:5000/cloud-store-api/User/")
+                BaseAddress = new Uri("https://localhost:7157/cloud-store-api/User/")
             };
         }
+
         public async Task<User?> RegistrationUser(string login, string password)
         {
-            
             var res = await _httpClient.PostAsJsonAsync("create-user", new LoginAndPassword
             {
                 Login = login,
                 Password = password
             });
+            _httpClient.Dispose();
             return res.StatusCode switch
             {
-                HttpStatusCode.OK => await res.Content.ReadFromJsonAsync<User>(),
+                HttpStatusCode.OK => await res.Content.ReadFromJsonAsync<User>(), 
                 HttpStatusCode.Conflict => throw new ExistentLoginException(),
                 HttpStatusCode.BadRequest => throw new NotValidException(),
                 _ => null,
             };
         }
+
         public async Task<User?> AuthorizeUser(string login, string password)
         {
-            var res = await _httpClient.PostAsJsonAsync("user", new LoginAndPassword
+            var res = await _httpClient.PostAsJsonAsync("authorize-user", new LoginAndPassword
             {
                 Login = login,
                 Password = password
             });
+            _httpClient.Dispose();
             return res.StatusCode switch
             {
                 HttpStatusCode.OK => await res.Content.ReadFromJsonAsync<User>(),
@@ -50,5 +53,6 @@ namespace CloudStore.UI.Services
                 _ => null,
             };
         }
+
     }
 }
