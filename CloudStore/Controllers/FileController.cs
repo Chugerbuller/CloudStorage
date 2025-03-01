@@ -95,7 +95,9 @@ public class FileController : ControllerBase
 
         var user = _dbUserHelper.GetUserByApiKey(apiKey);
 
-        return Ok(await _dbHelper.GetAllFilesInDirectory(user, user.UserDirectory));
+        var userDir = Path.Combine( _userDirectory, user.UserDirectory);
+
+        return Ok(await _dbHelper.GetAllFilesInDirectory(user, userDir));
     }
 
     [HttpGet("api-key:{apiKey}/all-files-from-directory/{directory}")]

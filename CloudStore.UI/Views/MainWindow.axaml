@@ -28,7 +28,11 @@
             BorderThickness="1"
             CornerRadius="3">
             <Grid ColumnDefinitions="*,30*">
-                <Button />
+                <Button
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Padding="0"
+                    Content="..." />
                 <TextBlock Grid.Row="0" Grid.Column="0" />
             </Grid>
         </Border>
@@ -40,8 +44,15 @@
             BorderThickness="1"
             Classes="Card"
             CornerRadius="3">
-            <ListBox>
-                <ListBoxItem />
+            <ListBox ItemsSource="{Binding FilesAndDirectorys}" SelectedItem="{Binding SelectedFileOrDirectory}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical">
+                            <Label Content="{Binding Extension}" />
+                            <TextBlock Text="{Binding Name}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
             </ListBox>
         </Border>
         <StackPanel

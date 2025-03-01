@@ -4,6 +4,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using CloudStore.UI.ViewModels;
 using CloudStore.UI.Views;
+using System.Diagnostics;
 
 namespace CloudStore.UI
 {
@@ -19,42 +20,26 @@ namespace CloudStore.UI
             //FIX ME
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow();
-                {
-                    DataContext = new MainWindowViewModel(null);
-                }
-               /* var vm = new LoginAndRegistrationViewModel();
-                var mwvm = new MainWindowViewModel(null);
+                var vm = new LoginAndRegistrationViewModel();
+
                 var win = desktop.MainWindow = new LoginAndRegistrationWindow
                 {
                     DataContext = vm,
                 };
-               
+
                 vm.Closed += (s, e) =>
                 {
-                    mwvm.User = vm.User;
-                    win.IsVisible = false;
-                    
+                    Debug.WriteLine("start main Window");
+                    var mwvm = new MainWindowViewModel(vm.User);
+                    win.Hide();
+
                     win = desktop.MainWindow = new MainWindow
                     {
                         DataContext = mwvm
                     };
-                    win.IsVisible = true;
+                    win.Show();
                 };
-                mwvm.Closed += (s, e) =>
-                { 
-                    if (Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopApp)
-                    {
-                        desktopApp.Shutdown();
-                    }
-                    else if (Current?.ApplicationLifetime is ISingleViewApplicationLifetime viewApp)
-                    {
-                        viewApp.MainView = null;
-                    }
-                    win.Close();
-                };*/
                
-
             }
 
             base.OnFrameworkInitializationCompleted();

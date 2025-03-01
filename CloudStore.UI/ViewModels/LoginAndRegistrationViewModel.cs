@@ -86,9 +86,9 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
             WatermarkLogin = "Существующий логин";
             return;
         }
-        catch (NotValidException)
+        catch (PasswordException)
         {
-            WatermarkLogin = "Неправильный логин";
+            WatermarkLogin = "Неправильный пароль";
             return;
         }
     }
