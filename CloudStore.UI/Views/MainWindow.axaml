@@ -1,0 +1,70 @@
+<Window
+    x:Class="CloudStore.UI.Views.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:CloudStore.UI.ViewModels"
+    Title="CloudStore.UI"
+    MinWidth="800"
+    MinHeight="600"
+    x:DataType="vm:MainWindowViewModel"
+    Background="White"
+    Icon="/Assets/avalonia-logo.ico"
+    mc:Ignorable="d">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+    <Grid
+        Margin="10"
+        ColumnDefinitions="8*,*"
+        RowDefinitions="0.5*,6*"
+        ShowGridLines="False">
+        <Border
+            Margin="10"
+            Padding="5,0,5,0"
+            BorderBrush="rgba(100,0,200,50)"
+            BorderThickness="1"
+            CornerRadius="3">
+            <Grid ColumnDefinitions="*,30*">
+                <Button
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Padding="0"
+                    Content="..." />
+                <TextBlock Grid.Row="0" Grid.Column="0" />
+            </Grid>
+        </Border>
+        <Border
+            Grid.Row="1"
+            Grid.Column="0"
+            Margin="10"
+            BorderBrush="rgba(100,0,200,50)"
+            BorderThickness="1"
+            Classes="Card"
+            CornerRadius="3">
+            <ListBox ItemsSource="{Binding FilesAndDirectorys}" SelectedItem="{Binding SelectedFileOrDirectory}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical">
+                            <Label Content="{Binding Extension}" />
+                            <TextBlock Text="{Binding Name}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+        <StackPanel
+            Grid.Row="1"
+            Grid.Column="1"
+            Margin="10"
+            Orientation="Vertical">
+            <Button />
+            <Button />
+            <Button />
+            <Button />
+        </StackPanel>
+        <Label Grid.Row="0" Grid.Column="1" />
+    </Grid>
+</Window>

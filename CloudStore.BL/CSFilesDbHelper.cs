@@ -17,6 +17,11 @@ namespace CloudStore.DAL
         public async Task<IEnumerable<FileModel>> GetAllFilesAsync(User user) =>
             await _dbContext.Files.Where(f => f.User == user).ToListAsync();
 
+        public async Task<IEnumerable<FileModel>> GetAllFilesInDirectory(User user, string directory)
+        {
+            return await _dbContext.Files.Where(f => f.Path == directory + "\\" + f.Name).ToListAsync();
+        }
+
         public async Task<FileModel?> GetFileByIdAsync(int id, User user) =>
              await _dbContext.Files.SingleOrDefaultAsync(f => f.Id == id && f.User == user);
 
@@ -47,28 +52,6 @@ namespace CloudStore.DAL
                 ?? throw new NullReferenceException();
             _dbContext.Files.Remove(temp);
 
-            await _dbContext.SaveChangesAsync();
-        }
-
-        public async Task<User?> FindUserByLoginAndPassword(string login, string password)
-        {
-            var user = await _dbContext.Users.SingleOrDefaultAsync(u => u.Login == login)
-                ?? throw new LoginException();
-
-            if (user.Password != password)
-                throw new PasswordException();
-            
-            return user;
-        }
-
-        public async Task AddNewUserAsync(User user)
-        {
-            var check = await _dbContext.Users.SingleOrDefaultAsync(u => u.Login == user.Login);
-
-            if (check is not null)
-                throw new ExistentLoginException();
-
-            await _dbContext.Users.AddAsync(user);
             await _dbContext.SaveChangesAsync();
         }
     }
