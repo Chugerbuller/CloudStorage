@@ -10,17 +10,19 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Text;
 
 namespace CloudStore.UI.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase, ICloseable
     {
         private readonly ApiFileService _apiFileService;
-        public ReactiveCommand<Unit, Unit> CommandCloseWindow { get; }
-        public ReactiveCommand<Unit,Unit> SendFileCommand { get; }
-        public ReactiveCommand<Unit,Unit> DeleteFileCommand { get; }
-        public ReactiveCommand<Unit,Unit> ChangeFileCommand { get; }
-        public ReactiveCommand<Unit,Unit> MakeDirectoryCommand { get; }
+        public ReactiveCommand<Unit, Unit> ToPrevDirecotryCommand { get; }
+        public ReactiveCommand<Unit, Unit> CloseWindowCommand { get; }
+        public ReactiveCommand<Unit, Unit> SendFileCommand { get; }
+        public ReactiveCommand<Unit, Unit> DeleteFileCommand { get; }
+        public ReactiveCommand<Unit, Unit> ChangeFileCommand { get; }
+        public ReactiveCommand<Unit, Unit> MakeDirectoryCommand { get; }
 
         public ObservableCollection<CloudStoreUiListItem?> FilesAndDirectorys { get; set; } = [];
 
@@ -37,14 +39,28 @@ namespace CloudStore.UI.ViewModels
         public MainWindowViewModel(User? user, List<CloudStoreUiListItem>? items)
         {
             User = user;
-            CommandCloseWindow = ReactiveCommand.Create(() => Closed(this, new EventArgs()));
+            CloseWindowCommand = ReactiveCommand.Create(() => Closed(this, new EventArgs()));
             UserPath = @"\";
+            ToPrevDirecotryCommand = ReactiveCommand.Create(ToPrevDirecotry);
 
             _apiFileService = new(User);
-            
-            FilesAndDirectorys = new(items);
 
-            
+            FilesAndDirectorys = new(items);
+        }
+
+        public void ToPrevDirecotry()
+        {
+            if (UserPath == @"\")
+                return;
+
+            var directoryList = UserPath.Split('/');
+            var newDirectoryList = "";
+            for (int i = 0; i < directoryList.Length - 1; i++)
+            {
+                newDirectoryList += directoryList[i];
+            }
+
+            UserPath = newDirectoryList;
         }
     }
 }
