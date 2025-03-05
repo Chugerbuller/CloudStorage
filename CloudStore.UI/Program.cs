@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.ReactiveUI;
 using System;
 
@@ -12,11 +13,17 @@ namespace CloudStore.UI
             .StartWithClassicDesktopLifetime(args);
 
         public static AppBuilder BuildAvaloniaApp()
-            => AppBuilder.Configure<App>()
+        {
+            
+
+            return AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .WithInterFont()
                 .LogToTrace()
                 .UseReactiveUI();
+        }
+            
+            
                 
     }
 }

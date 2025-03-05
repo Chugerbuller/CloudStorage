@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace CloudStore.UI.ViewModels
 {
@@ -47,7 +48,10 @@ namespace CloudStore.UI.ViewModels
 
             FilesAndDirectorys = new(items);
         }
+        public async Task MakeDirectory()
+        {
 
+        }
         public void ToPrevDirecotry()
         {
             if (UserPath == @"\")

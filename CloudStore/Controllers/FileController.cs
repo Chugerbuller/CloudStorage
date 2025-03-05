@@ -206,7 +206,7 @@ public class FileController : ControllerBase
         var user = _dbUserHelper.GetUserByApiKey(apiKey);
 
         if (uploadedFile is null)
-            return BadRequest();
+            return BadRequest("test");
 
         var path = Path.Combine(_userDirectory, user.UserDirectory);
 
@@ -232,7 +232,7 @@ public class FileController : ControllerBase
         };
         await _dbHelper.AddFileAsync(newFile);
 
-        return Ok("New file is added");
+        return Ok(newFile);
     }
 
     [HttpGet("api-key:{apiKey}/scan-directory/{directory}")]
