@@ -23,9 +23,6 @@ public class ApiFileService
     {
         _user = user;
         _httpClient = new HttpClient();
-        /*        {
-                    BaseAddress = new Uri("")
-                };*/
         _webClient = new WebClient();
     }
 

@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reactive;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Avalonia.Input;
 using CloudStore.BL.Models;
+using CloudStore.UI.Configs;
 using CloudStore.UI.Exceptions;
 using CloudStore.UI.Models;
 using CloudStore.UI.Services;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -85,6 +90,26 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
             {
                 var temp = new ApiFileService(User);
                 Items = await temp.GetStartingScreenItems(); //Fix me Почему это работает
+
+                if (RememberMe)
+                {
+                    var userJsonByte = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(User));
+                    using var fsUser = new FileStream("Configs\\UserConfig.json", FileMode.Truncate, FileAccess.Write);
+
+                    await fsUser.WriteAsync(userJsonByte);
+
+                    using var fsAppCfg = new FileStream("Configs\\ApplicationConfig.json", FileMode.Open, FileAccess.ReadWrite);
+                    var appJson = await JsonSerializer.DeserializeAsync<ApplicationConfig>(fsAppCfg);
+
+                    appJson.RememberUser = true;
+
+                    var appJsonByte = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(appJson));
+                    fsAppCfg.Dispose();
+                    using var writeAppCfg = new FileStream("Configs\\ApplicationConfig.json", FileMode.Truncate, FileAccess.Write);
+                    writeAppCfg.Write(appJsonByte);
+
+                }
+                
                 Closed(this, new EventArgs());
             }
         }

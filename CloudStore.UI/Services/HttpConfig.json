@@ -1,4 +1,3 @@
 {
-  "HttpBaseAddress": "http://localhost:5000/cloud-store-api/"
-
+  "HttpBaseAddress": "http://localhost:5000/cloud-store-api/",
 }

@@ -37,7 +37,7 @@ namespace CloudStore.UI.ViewModels
 
         public User? User { get; set; }
 
-        public MainWindowViewModel(User? user, List<CloudStoreUiListItem>? items)
+        public MainWindowViewModel(User? user)
         {
             User = user;
             CloseWindowCommand = ReactiveCommand.Create(() => Closed(this, new EventArgs()));
@@ -45,13 +45,13 @@ namespace CloudStore.UI.ViewModels
             ToPrevDirecotryCommand = ReactiveCommand.Create(ToPrevDirecotry);
 
             _apiFileService = new(User);
-
-            FilesAndDirectorys = new(items);
+            _initList();
         }
+
         public async Task MakeDirectory()
         {
-
         }
+
         public void ToPrevDirecotry()
         {
             if (UserPath == @"\")
@@ -65,6 +65,12 @@ namespace CloudStore.UI.ViewModels
             }
 
             UserPath = newDirectoryList;
+        }
+
+        private async void _initList()
+        {
+            var items = await _apiFileService.GetStartingScreenItems();
+            FilesAndDirectorys.AddRange(items);
         }
     }
 }

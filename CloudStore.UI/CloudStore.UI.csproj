@@ -29,4 +29,16 @@
   <ItemGroup>
     <ProjectReference Include="..\CloudStore.BL\CloudStore.BL.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Configs\ApplicationConfig.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Configs\ServerConfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Configs\UserConfig.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
