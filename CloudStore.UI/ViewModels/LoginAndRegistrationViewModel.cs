@@ -88,8 +88,7 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
             User = await _userService.AuthorizeUser(Login, Password);
             if (User is not null)
             {
-                var temp = new ApiFileService(User);
-                Items = await temp.GetStartingScreenItems(); //Fix me Почему это работает
+                var temp = new ApiFileService(User);//Fix me Почему это работает
 
                 if (RememberMe)
                 {
@@ -140,8 +139,7 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
            
             if (User is not null)
             {
-                var temp = new ApiFileService(User);
-                Items = await temp.GetStartingScreenItems();  //Fix me Почему это работает
+                var temp = new ApiFileService(User);  //Fix me Почему это работает
                 Closed(this, new EventArgs());
             }
                 

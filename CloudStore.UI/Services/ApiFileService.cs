@@ -1,6 +1,5 @@
 ﻿using CloudStore.BL.Models;
 using CloudStore.UI.Models;
-using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,25 +25,25 @@ public class ApiFileService
         _webClient = new WebClient();
     }
 
-    public async Task<List<CloudStoreUiListItem>?> GetStartingScreenItems()
+    public async Task<List<UCListItem>?> GetStartingScreenItems()
     {
-        var res = new List<CloudStoreUiListItem>();
-        List<FileForList>? files;
-        List<DirectoryForList>? directorys;
+        var res = new List<UCListItem>();
+        List<UCListItem>? files;
+        List<UCListItem>? directorys;
         //Fix me "api-key" scheme is not supported
         var rawFiles = await _httpClient.GetFromJsonAsync<IEnumerable<FileModel>>("https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/all-files-from-directory");
 
         if (rawFiles == null)
             files = null;
         else
-            files = rawFiles.Select(f => new FileForList(f)).ToList();
+            files = rawFiles.Select(f => new FileForList(f)).Select(f => new UCListItem(f)).ToList();
 
         var rawDirectorys = await _httpClient.GetFromJsonAsync<IEnumerable<string>>($"https://localhost:7157/cloud-store-api/File/api-key:{_user.ApiKey}/scan-directory");
 
         if (rawDirectorys == null)
             directorys = null;
         else
-            directorys = rawDirectorys.Select(d => new DirectoryForList(d)).ToList();
+            directorys = rawDirectorys.Select(d => new DirectoryForList(d)).Select(d => new UCListItem(d)).ToList();
 
         res.AddRange(directorys);
         res.AddRange(files);
@@ -52,24 +51,24 @@ public class ApiFileService
         return res;
     }
 
-    public async Task<List<CloudStoreUiListItem>?> GetItemsFromDirectory(string directory)
+    public async Task<List<UCListItem>?> GetItemsFromDirectory(string directory)
     {
-        var res = new List<CloudStoreUiListItem>();
-        IEnumerable<FileForList> files;
-        IEnumerable<DirectoryForList> directorys;
+        var res = new List<UCListItem>();
+        IEnumerable<UCListItem?> files;
+        IEnumerable<UCListItem?> directorys;
 
         var rawFiles = await _httpClient.GetFromJsonAsync<IEnumerable<FileModel>>("https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/all-files-from-directory/{directory}");
 
         if (rawFiles == null)
             files = null;
         else
-            files = rawFiles.Select(f => new FileForList(f));
+            files = rawFiles.Select(f => new FileForList(f)).Select(f => new UCListItem(f)).ToList(); ;
         var rawDirectorys = await _httpClient.GetFromJsonAsync<IEnumerable<string>>("https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/scan-directory/{directory}");
 
         if (rawDirectorys == null)
             directorys = null;
         else
-            directorys = rawDirectorys.Select(d => new DirectoryForList(d));
+            directorys = rawDirectorys.Select(d => new DirectoryForList(d)).Select(d => new UCListItem(d)).ToList();
 
         res.AddRange(directorys);
         res.AddRange(files);
@@ -77,7 +76,7 @@ public class ApiFileService
         return res;
     }
 
-    public async Task<CloudStoreUiListItem?> UploadFile(string filePath ,string? directory = "")
+    public async Task<UCListItem?> UploadFile(string filePath, string? directory = "")
     {
         using var multipartFormContent = new MultipartFormDataContent();
 
@@ -96,7 +95,7 @@ public class ApiFileService
         {
             HttpStatusCode.BadRequest => null,
             HttpStatusCode.Unauthorized => throw new Exception("Unauthorized"),
-            HttpStatusCode.OK => new FileForList(await resposne.Content.ReadFromJsonAsync<FileModel?>()),
+            HttpStatusCode.OK => new(new FileForList(await resposne.Content.ReadFromJsonAsync<FileModel?>())),
             _ => null,
         };
     }
@@ -111,12 +110,12 @@ public class ApiFileService
         return null;
     }
 
-    public async Task<CloudStoreUiListItem?> MakeDirectory(string directory)
+    public async Task<UCListItem?> MakeDirectory(string directory)
     {
         var response = await _httpClient.PostAsJsonAsync("https://localhost:7157/cloud-store-api/File/api-key:\" + _user.ApiKey + \"/new-directory", new { directory });
 
         if (response.StatusCode == HttpStatusCode.OK)
-            return new DirectoryForList(directory);
+            return new(new DirectoryForList(directory));
         else
             return null;
     }

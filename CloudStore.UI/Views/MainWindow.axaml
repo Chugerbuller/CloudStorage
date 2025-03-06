@@ -50,8 +50,8 @@
             CornerRadius="3">
             <ListBox ItemsSource="{Binding FilesAndDirectorys}" SelectedItem="{Binding SelectedFileOrDirectory}">
                 <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Border
+                    <!-- <DataTemplate>
+						<Border
                             BorderBrush="rgba(100,0,200,50)"
                             BorderThickness="1"
                             Classes="Card">
@@ -60,7 +60,7 @@
                                 <TextBlock HorizontalAlignment="Right" Text="{Binding Name}" />
                             </StackPanel>
                         </Border>
-                    </DataTemplate>
+                    </DataTemplate>-->
                 </ListBox.ItemTemplate>
             </ListBox>
         </Border>

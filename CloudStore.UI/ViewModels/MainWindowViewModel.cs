@@ -25,7 +25,7 @@ namespace CloudStore.UI.ViewModels
         public ReactiveCommand<Unit, Unit> ChangeFileCommand { get; }
         public ReactiveCommand<Unit, Unit> MakeDirectoryCommand { get; }
 
-        public ObservableCollection<CloudStoreUiListItem?> FilesAndDirectorys { get; set; } = [];
+        public ObservableCollection<UCListItem?> FilesAndDirectorys { get; set; } = [];
 
         [Reactive]
         public string UserPath { get; set; }
