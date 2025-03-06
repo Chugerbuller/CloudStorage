@@ -18,9 +18,8 @@
     </Design.DataContext>
     <Grid
         Margin="10"
-        ColumnDefinitions="8*,*"
-        RowDefinitions="0.5*,6*"
-        ShowGridLines="False">
+        ColumnDefinitions="8*,2*"
+        RowDefinitions="0.5*,7*">
         <Border
             Margin="10"
             Padding="5,0,5,0"
@@ -55,9 +54,16 @@
                             BorderBrush="rgba(100,0,200,50)"
                             BorderThickness="1"
                             Classes="Card">
-                            <StackPanel Orientation="Vertical">
-                                <TextBlock HorizontalAlignment="Left" Text="{Binding Extension}" />
-                                <TextBlock HorizontalAlignment="Right" Text="{Binding Name}" />
+                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                <Image
+                                    Width="30"
+                                    Height="30"
+                                    Source="{Binding ImageSource}" />
+                                <TextBlock
+                                    Margin="10,0,0,0"
+                                    HorizontalAlignment="Left"
+                                    FontFamily="Bold"
+                                    Text="{Binding Name}" />
                             </StackPanel>
                         </Border>
                     </DataTemplate>
@@ -69,16 +75,108 @@
             Grid.Column="1"
             Margin="10"
             Orientation="Vertical">
-            <Button Command="{Binding SendFileCommand}" Content="Добавить файл" />
-            <Button Command="{Binding DeleteFileCommand}" Content="Удалить файл" />
-            <Button Command="{Binding MakeDirectoryCommand}" Content="Создать папку" />
-
+            <Button Padding="10" Command="{Binding SendFileCommand}">
+                <Button.Content>
+                    <StackPanel
+                        Margin="5"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                        <Image
+                            Width="20"
+                            Height="20"
+                            Source="avares://CloudStore.UI/Assets/Upload.ico" />
+                        <Label Margin="5,0,0,0" Content="Добавить файл" />
+                    </StackPanel>
+                </Button.Content>
+            </Button>
+            <Button Command="{Binding DownloadFileCommand}">
+                <Button.Content>
+                    <StackPanel
+                        Margin="5"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                        <Image
+                            Width="20"
+                            Height="20"
+                            Source="avares://CloudStore.UI/Assets/Download2.ico" />
+                        <Label Margin="5,0,0,0" Content="Скачать файл" />
+                    </StackPanel>
+                </Button.Content>
+            </Button>
+            <Button Command="{Binding DeleteFileCommand}">
+                <Button.Content>
+                    <StackPanel
+                        Margin="5"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                        <Image
+                            Width="20"
+                            Height="20"
+                            Source="avares://CloudStore.UI/Assets/TrashCan.ico" />
+                        <Label Margin="5,0,0,0" Content="Удалить файл" />
+                    </StackPanel>
+                </Button.Content>
+            </Button>
+            <Button Command="{Binding MakeDirectoryShowCommand}">
+                <Button.Content>
+                    <StackPanel
+                        Margin="5"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                        <Image
+                            Width="20"
+                            Height="20"
+                            Source="avares://CloudStore.UI/Assets/FolderPlus.ico" />
+                        <Label Margin="5,0,0,0" Content="Создать папку" />
+                    </StackPanel>
+                </Button.Content>
+            </Button>
+            <Button Command="{Binding GoToDirectoryCommand}">
+                <Button.Content>
+                    <StackPanel
+                        Margin="5"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                        <Image
+                            Width="20"
+                            Height="20"
+                            Source="avares://CloudStore.UI/Assets/Folder2Open.ico" />
+                        <Label Margin="5,0,0,0" Content="Открыть папку" />
+                    </StackPanel>
+                </Button.Content>
+            </Button>
+            <StackPanel
+                HorizontalAlignment="Center"
+                IsVisible="{Binding MakeDirectoryVisibility}"
+                Orientation="Vertical">
+                <TextBox Margin="5" Text="{Binding NewDirectory}" />
+                <Button
+                    Margin="5"
+                    Command="{Binding MakeDirectoryCommand}"
+                    Content="Ок" />
+            </StackPanel>
         </StackPanel>
-        <Label
+        <StackPanel
             Grid.Row="0"
             Grid.Column="1"
-            HorizontalContentAlignment="Center"
-            VerticalContentAlignment="Center"
-            Content="{Binding User.Login}" />
+            Orientation="Horizontal">
+            <Label
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"
+                Content="{Binding User.Login}" />
+            <Button Background="rgba(0,0,0,255)">
+                <Button.Content>
+                    <Image
+                        Width="15"
+                        Height="15"
+                        Source="avares://CloudStore.UI/Assets/leave.ico" />
+                </Button.Content>
+            </Button>
+        </StackPanel>
     </Grid>
 </Window>

@@ -1,12 +1,10 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Platform;
 using CloudStore.BL.Models;
 using CloudStore.UI.Configs;
 using CloudStore.UI.ViewModels;
 using CloudStore.UI.Views;
-using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 

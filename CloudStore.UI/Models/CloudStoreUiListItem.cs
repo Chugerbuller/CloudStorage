@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Avalonia.Media.Imaging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,5 +26,6 @@ namespace CloudStore.UI.Models
         public string Name { get; set; }
         public string Type { get; }
         public string Extension { get; }
+        public Bitmap ImageSource { get; init; }
     }
 }

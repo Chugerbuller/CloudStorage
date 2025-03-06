@@ -95,7 +95,7 @@ public class FileController : ControllerBase
 
         var user = _dbUserHelper.GetUserByApiKey(apiKey);
 
-        var userDir = Path.Combine( _userDirectory, user.UserDirectory);
+        var userDir = Path.Combine(_userDirectory, user.UserDirectory);
 
         return Ok(await _dbHelper.GetAllFilesInDirectory(user, userDir));
     }
@@ -158,14 +158,16 @@ public class FileController : ControllerBase
             return Unauthorized();
 
         var user = _dbUserHelper.GetUserByApiKey(apiKey);
+        var file = await _dbHelper.GetFileByIdAsync(id, user);
+        System.IO.File.Delete(file.Path);
 
         await _dbHelper.DeleteFileByIdAsync(id, user);
 
         return Ok();
     }
 
-    [HttpPost("api-key:{apiKey}/new-directory")]
-    public IActionResult CreateDirectory(string apiKey, [FromBody] string directory)
+    [HttpGet("api-key:{apiKey}/new-directory/{directory}")]
+    public IActionResult CreateDirectory(string apiKey, string directory)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
@@ -195,7 +197,42 @@ public class FileController : ControllerBase
     }
 
     [HttpPost("api-key:{apiKey}/upload-file")]
-    public async Task<IActionResult> UploadFileAsync(string apiKey, IFormFile uploadedFile, string? directory = "")
+    public async Task<IActionResult> UploadFileAsync(string apiKey, IFormFile uploadedFile)
+    {
+        if (string.IsNullOrWhiteSpace(apiKey))
+            return BadRequest();
+
+        if (!_apiKeyValidation.IsValidApiKey(apiKey))
+            return Unauthorized();
+
+        var user = _dbUserHelper.GetUserByApiKey(apiKey);
+
+        if (uploadedFile is null)
+            return BadRequest("test");
+
+        var path = Path.Combine(_userDirectory, user.UserDirectory);
+
+        path += "\\" + uploadedFile.FileName;
+
+        using var fs = new FileStream(path, FileMode.Create);
+        await uploadedFile.CopyToAsync(fs);
+
+        var extension = uploadedFile.FileName.Split('.')[^1];
+
+        var newFile = new FileModel
+        {
+            Name = uploadedFile.FileName,
+            Path = path,
+            Extension = extension,
+            UserId = user.Id
+        };
+        await _dbHelper.AddFileAsync(newFile);
+
+        return Ok(newFile);
+    }
+
+    [HttpPost("api-key:{apiKey}/upload-file/{directory}")]
+    public async Task<IActionResult> UploadFileAsync(string apiKey, string directory, IFormFile uploadedFile)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();

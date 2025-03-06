@@ -53,6 +53,7 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
     [Reactive]
     public string WatermarkPasswordReg { get; set; } = "¬ведите пароль";
 
+
     #endregion ReactiveProps
 
     #region ReactiveCommands

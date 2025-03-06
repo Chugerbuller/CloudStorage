@@ -1,4 +1,5 @@
-﻿using CloudStore.BL.Models;
+﻿using Avalonia.Media.Imaging;
+using CloudStore.BL.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace CloudStore.UI.Models
         public DirectoryForList(string directory) : base(directory, ItemType.Directory, "")
         {
             Directory = directory;
+            base.ImageSource = new Bitmap("Assets\\folder.ico");
         }
 
         public string Directory { get; init; }
