@@ -118,7 +118,7 @@ public class FileController : ControllerBase
         var res = await _dbHelper.GetAllFilesInDirectory(user, path);
         if (res is null)
             return Ok(null);
-        
+
         return Ok(await _dbHelper.GetAllFilesInDirectory(user, path));
     }
 
@@ -146,8 +146,19 @@ public class FileController : ControllerBase
         bool isValid = _apiKeyValidation.IsValidApiKey(apiKey);
         if (!isValid)
             return Unauthorized();
-
+        var user = _dbUserHelper.GetUserByApiKey(apiKey);
+        var oldFile = await _dbHelper.GetFileByIdAsync(file.Id, user);
         await _dbHelper.UpdateFile(file);
+
+        try
+        {
+            System.IO.File.Replace(oldFile.Path, file.Path, null);
+        }
+        catch (IOException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
         return Ok();
     }
 
@@ -171,7 +182,7 @@ public class FileController : ControllerBase
     }
 
     [HttpPost("api-key:{apiKey}/new-directory")]
-    public IActionResult CreateDirectory(string apiKey,[FromBody] string directory)
+    public IActionResult CreateDirectory(string apiKey, [FromBody] string directory)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
@@ -236,8 +247,9 @@ public class FileController : ControllerBase
     }
 
     [HttpPost("api-key:{apiKey}/upload-file/{directory}")]
-    public async Task<IActionResult> UploadFileAsync(string apiKey, Uri directory, IFormFile uploadedFile)
+    public async Task<IActionResult> UploadFileAsync(string apiKey, string directory, IFormFile uploadedFile)
     {
+        directory = string.Join("\\", directory.Split("|"));
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
 
@@ -251,10 +263,10 @@ public class FileController : ControllerBase
 
         var path = Path.Combine(_userDirectory, user.UserDirectory);
 
-        if (!string.IsNullOrEmpty(directory.ToString()) && !Directory.Exists(Path.Combine(path, directory)))
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(Path.Combine(path, directory)))
             return NotFound("Directory is not exist");
 
-        if (string.IsNullOrEmpty(directory.ToString()))
+        if (string.IsNullOrEmpty(directory))
             path += "\\" + uploadedFile.FileName;
         else
             path += "\\" + directory + "\\" + uploadedFile.FileName;

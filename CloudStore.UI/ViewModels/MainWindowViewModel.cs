@@ -24,7 +24,7 @@ namespace CloudStore.UI.ViewModels
         public ReactiveCommand<Unit, Unit> SendFileCommand { get; }
         public ReactiveCommand<Unit, Unit> DownloadFileCommand { get; }
         public ReactiveCommand<Unit, Unit> DeleteFileCommand { get; }
-        public ReactiveCommand<Unit, Unit> ChangeFileCommand { get; }
+        public ReactiveCommand<Unit, Unit> EditFileCommand { get; }
         public ReactiveCommand<Unit, Unit> MakeDirectoryCommand { get; }
         public ReactiveCommand<Unit, Unit> MakeDirectoryShowCommand { get; }
         public ReactiveCommand<Unit, Unit> GoToDirectoryCommand { get; }
@@ -34,6 +34,8 @@ namespace CloudStore.UI.ViewModels
 
         [Reactive]
         public string UserPath { get; set; } = "";
+        [Reactive]
+        public bool EnableEditFile { get; set; } = false;
 
         [Reactive]
         public CloudStoreUiListItem SelectedFileOrDirectory { get; set; }
@@ -61,6 +63,7 @@ namespace CloudStore.UI.ViewModels
             DeleteFileCommand = ReactiveCommand.CreateFromTask(DeleteFile);
             MakeDirectoryShowCommand = ReactiveCommand.Create(MakeDirectoryShow);
             MakeDirectoryCommand = ReactiveCommand.CreateFromTask(MakeDirectory);
+            //EditFileCommand = ReactiveCommand.CreateFromTask(EditFile);
             _apiFileService = new(User);
             _initList();
         }
@@ -200,7 +203,9 @@ namespace CloudStore.UI.ViewModels
             var items = await _apiFileService.GetStartingScreenItems();
             FilesAndDirectorys.AddRange(items);
         }
-
+        public async Task EditFile()
+        {
+        }
         public void LogOut()
         {
             /*  var appCfg = JsonSerializer.Deserialize<ApplicationConfig>(File.ReadAllText("Configs\\ApplicationConfig.json"));

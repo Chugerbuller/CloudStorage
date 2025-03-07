@@ -69,11 +69,12 @@
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Center"
                                         Source="{Binding ImageSource}" />
-                                    <TextBlock
+                                    <TextBox
                                         Margin="10,0,0,0"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Center"
                                         FontFamily="Bold"
+                                        IsEnabled="{ReflectionBinding #items.DataContext.EnableEditFile}"
                                         Text="{Binding Name}" />
                                 </StackPanel>
                                 <StackPanel
@@ -92,6 +93,19 @@
                                                 Width="20"
                                                 Height="20"
                                                 Source="avares://CloudStore.UI/Assets/Download2.ico" />
+                                        </Button.Content>
+                                    </Button>
+                                    <Button
+                                        Margin="5"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Command="{ReflectionBinding #items.DataContext.EditFileCommand}"
+                                        IsVisible="{Binding ButtonEditIsVisible}">
+                                        <Button.Content>
+                                            <Image
+                                                Width="20"
+                                                Height="20"
+                                                Source="avares://CloudStore.UI/Assets/Edit.ico" />
                                         </Button.Content>
                                     </Button>
                                     <Button

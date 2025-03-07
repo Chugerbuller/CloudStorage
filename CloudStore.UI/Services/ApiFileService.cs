@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CloudStore.UI.Services;
@@ -89,12 +90,14 @@ public class ApiFileService
         return res;
     }
 
-    public async Task<CloudStoreUiListItem?> UploadFile(string filePath, string? directory = "")
+    public async Task<CloudStoreUiListItem?> UploadFile(string filePath, string directory = "")
     {
         using var multipartFormContent = new MultipartFormDataContent();
-        var url = "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/upload-file/";
+        var url = "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey;
         if (directory is not null)
-            url += directory;
+            url += $@"/upload-file/{string.Join("|", directory.Split("\\"))}";
+        else
+            url += "/upload-file";
 
         var fileName = filePath.Split(@"\")[^1];
         var extension = fileName.Split(".")[^1];
