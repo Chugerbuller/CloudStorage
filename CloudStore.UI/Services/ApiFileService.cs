@@ -54,6 +54,7 @@ public class ApiFileService
 
     public async Task<List<CloudStoreUiListItem>?> GetItemsFromDirectory(string directory)
     {
+        directory = string.Join("|", directory.Split("\\"));
         var res = new List<CloudStoreUiListItem>();
         IEnumerable<FileForList> files;
         IEnumerable<DirectoryForList> directorys;

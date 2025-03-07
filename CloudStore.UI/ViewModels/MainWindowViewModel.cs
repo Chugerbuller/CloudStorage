@@ -181,14 +181,15 @@ namespace CloudStore.UI.ViewModels
             if (UserPath == "")
                 return;
 
-            var directoryList = UserPath.Split('/');
-            var newDirectoryList = "";
-            for (int i = 0; i < directoryList.Length - 1; i++)
+            var directoryList = UserPath.Split('\\');
+        
+            var newDirectoryList = new string[directoryList.Length - 1];
+            for (int i = 0; i <= directoryList.Length - 2; i++)
             {
-                newDirectoryList += directoryList[i];
+                newDirectoryList[i] = directoryList[i];
             }
-
-            UserPath = newDirectoryList;
+            var newDir = string.Join('\\', newDirectoryList);
+            UserPath = newDir;
 
             var newItems = await _apiFileService.GetItemsFromDirectory(UserPath);
 

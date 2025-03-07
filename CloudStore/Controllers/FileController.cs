@@ -103,6 +103,7 @@ public class FileController : ControllerBase
     [HttpGet("api-key:{apiKey}/all-files-from-directory/{directory}")]
     public async Task<IActionResult> GetAllFilesFromDirectory(string apiKey, string directory)
     {
+        directory = string.Join("\\", directory.Split("|"));
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
 
@@ -291,6 +292,7 @@ public class FileController : ControllerBase
     [HttpGet("api-key:{apiKey}/scan-directory/{directory}")]
     public async Task<IActionResult> ScanDirectory(string apiKey, string directory)
     {
+        directory = string.Join("\\", directory.Split("|"));
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
 
