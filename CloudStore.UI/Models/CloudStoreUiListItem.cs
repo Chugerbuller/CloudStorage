@@ -27,5 +27,44 @@ namespace CloudStore.UI.Models
         public string Type { get; }
         public string Extension { get; }
         public Bitmap ImageSource { get; init; }
+        public bool ButtonDowloadIsVisible { 
+            get
+            {
+                if (Type == "Directory")
+                    return false;
+                else 
+                    return true;
+            }
+        }
+        public bool ButtonEditIsVisible
+        {
+            get
+            {
+                if (Type == "Directory")
+                    return false;
+                else
+                    return true;
+            }
+        }
+        public bool ButtonDeleteIsVisible
+        {
+            get
+            {
+                if (Type == "Directory")
+                    return false;
+                else
+                    return true;
+            }
+        }
+        public bool ButtonGoToIsVisible
+        {
+            get
+            {
+                if (Type == "Directory")
+                    return true;
+                else
+                    return false;
+            }
+        }
     }
 }

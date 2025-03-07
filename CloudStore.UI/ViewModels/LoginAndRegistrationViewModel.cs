@@ -49,10 +49,13 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
 
     [Reactive]
     public string WatermarkLogin { get; set; } = "Введите логин";
+    [Reactive]
+    public string WatermarkPassword { get; set; } = "Введите пароль";
 
     [Reactive]
     public string WatermarkPasswordReg { get; set; } = "Введите пароль";
-
+    [Reactive]
+    public string WatermarkLoginReg { get; set; } = "Введите логин";
 
     #endregion ReactiveProps
 
@@ -65,8 +68,8 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
     #endregion ReactiveCommands
 
     public event EventHandler? Closed;
+
     public User? User { get; private set; }
-    public List<CloudStoreUiListItem>? Items { get; set; }
 
     public LoginAndRegistrationViewModel()
     {
@@ -89,8 +92,6 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
             User = await _userService.AuthorizeUser(Login, Password);
             if (User is not null)
             {
-                var temp = new ApiFileService(User);
-                Items = await temp.GetStartingScreenItems(); //Fix me Почему это работает
 
                 if (RememberMe)
                 {
@@ -105,12 +106,9 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
                     appJson.RememberUser = true;
 
                     var appJsonByte = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(appJson));
-                    fsAppCfg.Dispose();
                     using var writeAppCfg = new FileStream("Configs\\ApplicationConfig.json", FileMode.Truncate, FileAccess.Write);
                     writeAppCfg.Write(appJsonByte);
-
                 }
-                
                 Closed(this, new EventArgs());
             }
         }
@@ -121,8 +119,12 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
         }
         catch (PasswordException)
         {
-            WatermarkLogin = "Неправильный пароль";
+            WatermarkPassword = "Неправильный пароль";
             return;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
         }
     }
 
@@ -138,22 +140,23 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
         try
         {
             User = await _userService.RegistrationUser(LoginRegistration, PasswordRegistration);
-           
+
             if (User is not null)
             {
-                var temp = new ApiFileService(User);
-                Items = await temp.GetStartingScreenItems();  //Fix me Почему это работает
                 Closed(this, new EventArgs());
             }
-                
         }
         catch (ExistentLoginException)
         {
-            WatermarkPasswordReg = "Существующий логин";
+            WatermarkLoginReg = "Существующий логин";
         }
         catch (NotValidException)
         {
             WatermarkPasswordReg = "Невалидный пароль";
+        }
+        catch (Exception)
+        {
+            return;
         }
     }
 }

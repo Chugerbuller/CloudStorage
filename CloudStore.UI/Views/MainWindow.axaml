@@ -47,7 +47,10 @@
             BorderThickness="1"
             Classes="Card"
             CornerRadius="3">
-            <ListBox ItemsSource="{Binding FilesAndDirectorys}" SelectedItem="{Binding SelectedFileOrDirectory}">
+            <ListBox
+                x:Name="items"
+                ItemsSource="{Binding FilesAndDirectorys}"
+                SelectedItem="{Binding SelectedFileOrDirectory}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Border
@@ -64,6 +67,51 @@
                                     HorizontalAlignment="Left"
                                     FontFamily="Bold"
                                     Text="{Binding Name}" />
+                                <Button Command="{ReflectionBinding #items.DataContext.DownloadFileCommand}" IsVisible="{Binding ButtonDowloadIsVisible}">
+                                    <Button.Content>
+                                        <StackPanel
+                                            Margin="5"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Orientation="Horizontal">
+                                            <Image
+                                                Width="20"
+                                                Height="20"
+                                                Source="avares://CloudStore.UI/Assets/Download2.ico" />
+                                            <Label Margin="5,0,0,0" Content="Скачать файл" />
+                                        </StackPanel>
+                                    </Button.Content>
+                                </Button>
+                                <Button Command="{ReflectionBinding #items.DataContext.DeleteFileCommand}" IsVisible="{Binding ButtonDeleteIsVisible}">
+                                    <Button.Content>
+                                        <StackPanel
+                                            Margin="5"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Orientation="Horizontal">
+                                            <Image
+                                                Width="20"
+                                                Height="20"
+                                                Source="avares://CloudStore.UI/Assets/TrashCan.ico" />
+                                            <Label Margin="5,0,0,0" Content="Удалить файл" />
+                                        </StackPanel>
+                                    </Button.Content>
+                                </Button>
+                                <Button Command="{ReflectionBinding #items.DataContext.GoToDirectoryCommand}" IsVisible="{Binding ButtonGoToIsVisible}">
+                                    <Button.Content>
+                                        <StackPanel
+                                            Margin="5"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Orientation="Horizontal">
+                                            <Image
+                                                Width="20"
+                                                Height="20"
+                                                Source="avares://CloudStore.UI/Assets/Folder2Open.ico" />
+                                            <Label Margin="5,0,0,0" Content="Открыть папку" />
+                                        </StackPanel>
+                                    </Button.Content>
+                                </Button>
                             </StackPanel>
                         </Border>
                     </DataTemplate>
@@ -90,36 +138,6 @@
                     </StackPanel>
                 </Button.Content>
             </Button>
-            <Button Command="{Binding DownloadFileCommand}">
-                <Button.Content>
-                    <StackPanel
-                        Margin="5"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Orientation="Horizontal">
-                        <Image
-                            Width="20"
-                            Height="20"
-                            Source="avares://CloudStore.UI/Assets/Download2.ico" />
-                        <Label Margin="5,0,0,0" Content="Скачать файл" />
-                    </StackPanel>
-                </Button.Content>
-            </Button>
-            <Button Command="{Binding DeleteFileCommand}">
-                <Button.Content>
-                    <StackPanel
-                        Margin="5"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Orientation="Horizontal">
-                        <Image
-                            Width="20"
-                            Height="20"
-                            Source="avares://CloudStore.UI/Assets/TrashCan.ico" />
-                        <Label Margin="5,0,0,0" Content="Удалить файл" />
-                    </StackPanel>
-                </Button.Content>
-            </Button>
             <Button Command="{Binding MakeDirectoryShowCommand}">
                 <Button.Content>
                     <StackPanel
@@ -132,21 +150,6 @@
                             Height="20"
                             Source="avares://CloudStore.UI/Assets/FolderPlus.ico" />
                         <Label Margin="5,0,0,0" Content="Создать папку" />
-                    </StackPanel>
-                </Button.Content>
-            </Button>
-            <Button Command="{Binding GoToDirectoryCommand}">
-                <Button.Content>
-                    <StackPanel
-                        Margin="5"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Orientation="Horizontal">
-                        <Image
-                            Width="20"
-                            Height="20"
-                            Source="avares://CloudStore.UI/Assets/Folder2Open.ico" />
-                        <Label Margin="5,0,0,0" Content="Открыть папку" />
                     </StackPanel>
                 </Button.Content>
             </Button>

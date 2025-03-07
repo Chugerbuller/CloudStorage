@@ -54,7 +54,7 @@
                             PasswordChar="*"
                             Text="{Binding Password, Mode=TwoWay}"
                             UseFloatingWatermark="True"
-                            Watermark="Введите Пароль" />
+                            Watermark="{Binding WatermarkPassword}" />
                         <StackPanel Margin="10,0,10,10" Orientation="Horizontal">
                             <ToggleButton
                                 Width="20"
@@ -121,7 +121,7 @@
                             Margin="10,20,10,0"
                             Text="{Binding LoginRegistration, Mode=TwoWay}"
                             UseFloatingWatermark="True"
-                            Watermark="Введите логин" />
+                            Watermark="{Binding WatermarkLoginReg}" />
                         <TextBox
                             Margin="10,20,10,0"
                             PasswordChar="*"
