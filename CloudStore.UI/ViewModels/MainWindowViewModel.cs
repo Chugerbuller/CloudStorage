@@ -37,10 +37,13 @@ namespace CloudStore.UI.ViewModels
 
         [Reactive]
         public CloudStoreUiListItem SelectedFileOrDirectory { get; set; }
+
         [Reactive]
-        public bool MakeDirectoryVisibility { get; set; } = false; 
+        public bool MakeDirectoryVisibility { get; set; } = false;
+
         [Reactive]
         public string NewDirectory { get; set; } = "";
+
         public event EventHandler? Closed;
 
         public User? User { get; set; }
@@ -73,9 +76,13 @@ namespace CloudStore.UI.ViewModels
                 FilesAndDirectorys.Clear();
                 FilesAndDirectorys.AddRange(newItems);
 
-                UserPath += "\\" + directory.Directory;
+                if (UserPath == "")
+                    UserPath += directory.Directory;
+                else
+                    UserPath += $@"\{directory.Directory}";
             }
         }
+
         public async Task DeleteFile()
         {
             if (SelectedFileOrDirectory == null)
@@ -90,6 +97,7 @@ namespace CloudStore.UI.ViewModels
                     return;
             }
         }
+
         public async Task DownloadFile()
         {
             try
@@ -147,15 +155,17 @@ namespace CloudStore.UI.ViewModels
                 return;
             }
         }
+
         public void MakeDirectoryShow()
         {
             MakeDirectoryVisibility = !MakeDirectoryVisibility;
         }
+
         public async Task MakeDirectory()
         {
-            var newDirectory = await _apiFileService.MakeDirectory(Path.Combine(UserPath,NewDirectory));
+            var newDirectory = await _apiFileService.MakeDirectory($@"{UserPath}\{NewDirectory}");
 
-            if (newDirectory is null) 
+            if (newDirectory is null)
                 return;
             FilesAndDirectorys.Add(newDirectory);
 

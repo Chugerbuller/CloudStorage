@@ -115,6 +115,10 @@ public class FileController : ControllerBase
 
         var path = Path.Combine(userDir, directory);
 
+        var res = await _dbHelper.GetAllFilesInDirectory(user, path);
+        if (res is null)
+            return Ok(null);
+        
         return Ok(await _dbHelper.GetAllFilesInDirectory(user, path));
     }
 
@@ -166,8 +170,8 @@ public class FileController : ControllerBase
         return Ok();
     }
 
-    [HttpGet("api-key:{apiKey}/new-directory/{directory}")]
-    public IActionResult CreateDirectory(string apiKey, string directory)
+    [HttpPost("api-key:{apiKey}/new-directory")]
+    public IActionResult CreateDirectory(string apiKey,[FromBody] string directory)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
@@ -232,7 +236,7 @@ public class FileController : ControllerBase
     }
 
     [HttpPost("api-key:{apiKey}/upload-file/{directory}")]
-    public async Task<IActionResult> UploadFileAsync(string apiKey, string directory, IFormFile uploadedFile)
+    public async Task<IActionResult> UploadFileAsync(string apiKey, Uri directory, IFormFile uploadedFile)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
@@ -247,10 +251,10 @@ public class FileController : ControllerBase
 
         var path = Path.Combine(_userDirectory, user.UserDirectory);
 
-        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(Path.Combine(path, directory)))
+        if (!string.IsNullOrEmpty(directory.ToString()) && !Directory.Exists(Path.Combine(path, directory)))
             return NotFound("Directory is not exist");
 
-        if (string.IsNullOrEmpty(directory))
+        if (string.IsNullOrEmpty(directory.ToString()))
             path += "\\" + uploadedFile.FileName;
         else
             path += "\\" + directory + "\\" + uploadedFile.FileName;

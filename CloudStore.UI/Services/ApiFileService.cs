@@ -56,19 +56,32 @@ public class ApiFileService
         var res = new List<CloudStoreUiListItem>();
         IEnumerable<FileForList> files;
         IEnumerable<DirectoryForList> directorys;
+        try
+        {
+            var rawFiles = await _httpClient.GetFromJsonAsync<IEnumerable<FileModel>>("https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + $"/all-files-from-directory/{directory}");
 
-        var rawFiles = await _httpClient.GetFromJsonAsync<IEnumerable<FileModel>>("https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + $"/all-files-from-directory/{directory}");
+            if (rawFiles == null)
+                files = [];
+            else
+                files = rawFiles.Select(f => new FileForList(f));
+        }
+        catch (Exception)
+        {
+            files = [];
+        }
+        try
+        {
+            var rawDirectorys = await _httpClient.GetFromJsonAsync<IEnumerable<string>>("https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + $"/scan-directory/{directory}");
 
-        if (rawFiles == null)
-            files = null;
-        else
-            files = rawFiles.Select(f => new FileForList(f));
-        var rawDirectorys = await _httpClient.GetFromJsonAsync<IEnumerable<string>>("https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + $"/scan-directory/{directory}");
-
-        if (rawDirectorys == null)
-            directorys = null;
-        else
-            directorys = rawDirectorys.Select(d => new DirectoryForList(d));
+            if (rawDirectorys == null)
+                directorys = [];
+            else
+                directorys = rawDirectorys.Select(d => new DirectoryForList(d));
+        }
+        catch (Exception)
+        {
+            directorys = [];
+        }
 
         res.AddRange(directorys);
         res.AddRange(files);
@@ -81,7 +94,7 @@ public class ApiFileService
         using var multipartFormContent = new MultipartFormDataContent();
         var url = "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/upload-file/";
         if (directory is not null)
-            url += directory.Split("\\")[1];
+            url += directory;
 
         var fileName = filePath.Split(@"\")[^1];
         var extension = fileName.Split(".")[^1];
@@ -143,10 +156,13 @@ public class ApiFileService
 
     public async Task<DirectoryForList?> MakeDirectory(string directory)
     {
-        var response = await _httpClient.GetAsync("https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/new-directory/" + directory);
+        //https://localhost:7157/cloud-store-api/File/api-key:90546392470C5E893709E707FB70F88E/new-directory/testDir%2FDir
+        var url = "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/new-directory";
+        var jsonContent = JsonContent.Create(directory);
+        var response = await _httpClient.PostAsync(url, jsonContent);
 
         if (response.StatusCode == HttpStatusCode.OK)
-            return new DirectoryForList(directory);
+            return new DirectoryForList(directory.Split("\\")[^1]);
         else
             return null;
     }

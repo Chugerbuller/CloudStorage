@@ -104,7 +104,7 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
                     var appJson = await JsonSerializer.DeserializeAsync<ApplicationConfig>(fsAppCfg);
 
                     appJson.RememberUser = true;
-
+                    fsAppCfg.Dispose();
                     var appJsonByte = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(appJson));
                     using var writeAppCfg = new FileStream("Configs\\ApplicationConfig.json", FileMode.Truncate, FileAccess.Write);
                     writeAppCfg.Write(appJsonByte);
