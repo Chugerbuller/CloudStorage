@@ -166,7 +166,11 @@ namespace CloudStore.UI.ViewModels
 
         public async Task MakeDirectory()
         {
-            var newDirectory = await _apiFileService.MakeDirectory($@"{UserPath}\{NewDirectory}");
+            DirectoryForList? newDirectory;
+            if (UserPath == "")
+                newDirectory = await _apiFileService.MakeDirectory("{NewDirectory}");
+
+            newDirectory = await _apiFileService.MakeDirectory($@"{UserPath}\{NewDirectory}");
 
             if (newDirectory is null)
                 return;
