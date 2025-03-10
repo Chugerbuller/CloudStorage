@@ -116,10 +116,6 @@ public class FileController : ControllerBase
 
         var path = Path.Combine(userDir, directory);
 
-        var res = await _dbHelper.GetAllFilesInDirectory(user, path);
-        if (res is null)
-            return Ok(null);
-
         return Ok(await _dbHelper.GetAllFilesInDirectory(user, path));
     }
 
@@ -129,7 +125,7 @@ public class FileController : ControllerBase
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
 
-        bool isValid = _apiKeyValidation.IsValidApiKey(apiKey);
+        var isValid = _apiKeyValidation.IsValidApiKey(apiKey);
         if (!isValid)
             return Unauthorized();
 
@@ -188,7 +184,7 @@ public class FileController : ControllerBase
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
 
-        bool isValid = _apiKeyValidation.IsValidApiKey(apiKey);
+        var isValid = _apiKeyValidation.IsValidApiKey(apiKey);
         if (!isValid)
             return Unauthorized();
 
@@ -272,7 +268,7 @@ public class FileController : ControllerBase
         else
             path += "\\" + directory + "\\" + uploadedFile.FileName;
 
-        using var fs = new FileStream(path, FileMode.Create);
+        await using var fs = new FileStream(path, FileMode.Create);
         await uploadedFile.CopyToAsync(fs);
 
         var extension = uploadedFile.FileName.Split('.')[^1];
@@ -310,10 +306,7 @@ public class FileController : ControllerBase
 
         var absolutPaths = Directory.EnumerateDirectories(path).ToList();
 
-        var res = new List<string>();
-
-        foreach (var p in absolutPaths)
-            res.Add(Path.GetRelativePath(path, p));
+        var res = absolutPaths.Select(p => Path.GetRelativePath(path, p)).ToList();
 
         return Ok(res);
     }
@@ -333,10 +326,7 @@ public class FileController : ControllerBase
         var path = Path.Combine(_userDirectory, user.UserDirectory);
 
         var absolutPaths = Directory.EnumerateDirectories(path).ToList();
-        var res = new List<string>();
-
-        foreach (var p in absolutPaths)
-            res.Add(Path.GetRelativePath(path, p));
+        var res = absolutPaths.Select(p => Path.GetRelativePath(path, p)).ToList();
 
         return Ok(res);
     }

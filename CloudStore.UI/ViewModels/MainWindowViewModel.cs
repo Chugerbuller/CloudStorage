@@ -168,7 +168,7 @@ namespace CloudStore.UI.ViewModels
         {
             DirectoryForList? newDirectory;
             if (UserPath == "")
-                newDirectory = await _apiFileService.MakeDirectory("{NewDirectory}");
+                newDirectory = await _apiFileService.MakeDirectory($"{NewDirectory}");
 
             newDirectory = await _apiFileService.MakeDirectory($@"{UserPath}\{NewDirectory}");
 

@@ -48,14 +48,14 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
     public string PasswordRegistrationRepeat { get; set; }
 
     [Reactive]
-    public string WatermarkLogin { get; set; } = "Введите логин";
+    public string WatermarkLogin { get; set; } = "Р’РІРµРґРёС‚Рµ Р»РѕРіРёРЅ";
     [Reactive]
-    public string WatermarkPassword { get; set; } = "Введите пароль";
+    public string WatermarkPassword { get; set; } = "Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ";
 
     [Reactive]
-    public string WatermarkPasswordReg { get; set; } = "Введите пароль";
+    public string WatermarkPasswordReg { get; set; } = "Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ";
     [Reactive]
-    public string WatermarkLoginReg { get; set; } = "Введите логин";
+    public string WatermarkLoginReg { get; set; } = "Р’РІРµРґРёС‚Рµ Р»РѕРіРёРЅ";
 
     #endregion ReactiveProps
 
@@ -114,12 +114,12 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
         }
         catch (ExistentLoginException)
         {
-            WatermarkLogin = "Существующий логин";
+            WatermarkLogin = "РЎСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ Р»РѕРіРёРЅ";
             return;
         }
         catch (PasswordException)
         {
-            WatermarkPassword = "Неправильный пароль";
+            WatermarkPassword = "РќРµРїСЂР°РІРёР»СЊРЅС‹Р№ РїР°СЂРѕР»СЊ";
             return;
         }
         catch (Exception ex)
@@ -134,7 +134,7 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
             return;
         if (PasswordRegistration != PasswordRegistrationRepeat)
         {
-            WatermarkPasswordReg = "Пароли должны совпадать";
+            WatermarkPasswordReg = "РџР°СЂРѕР»Рё РґРѕР»Р¶РЅС‹ СЃРѕРІРїР°РґР°С‚СЊ";
             return;
         }
         try
@@ -148,11 +148,11 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
         }
         catch (ExistentLoginException)
         {
-            WatermarkLoginReg = "Существующий логин";
+            WatermarkLoginReg = "РЎСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ Р»РѕРіРёРЅ";
         }
         catch (NotValidException)
         {
-            WatermarkPasswordReg = "Невалидный пароль";
+            WatermarkPasswordReg = "РќРµРІР°Р»РёРґРЅС‹Р№ РїР°СЂРѕР»СЊ";
         }
         catch (Exception)
         {
