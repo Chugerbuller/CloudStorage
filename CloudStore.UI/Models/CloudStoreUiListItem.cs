@@ -41,7 +41,7 @@ namespace CloudStore.UI.Models
             get
             {
                 if (Type == "Directory")
-                    return false;
+                    return true;
                 else
                     return true;
             }
@@ -51,7 +51,7 @@ namespace CloudStore.UI.Models
             get
             {
                 if (Type == "Directory")
-                    return false;
+                    return true;
                 else
                     return true;
             }

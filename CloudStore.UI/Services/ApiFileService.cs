@@ -157,14 +157,14 @@ public class ApiFileService
     public async Task<CloudStoreUiListItem?> UpdateFile(FileModel file)
     {
         HttpContent content = JsonContent.Create(file.Name);
-       
+
         var response =
             await _httpClient.PutAsync(
                 "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + $"/update-file/{file.Id}", content);
         if (response.IsSuccessStatusCode)
         {
             var updateFile = await response.Content.ReadFromJsonAsync<FileModel>();
-           
+
             return new FileForList(updateFile);
         }
         else return null;
@@ -181,5 +181,29 @@ public class ApiFileService
             return new DirectoryForList(directory.Split("\\")[^1]);
         else
             return null;
+    }
+
+    public async Task<DirectoryForList?> ChangeDirectoryName(string oldDirectory, string newDirectoryName)
+    {
+        
+        HttpContent content = JsonContent.Create(oldDirectory);
+        
+        var response = await _httpClient.PutAsync(
+            "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + $"/rename-directory/{newDirectoryName}", content);
+        
+        if (response.IsSuccessStatusCode)
+            return new DirectoryForList(await response.Content.ReadAsStringAsync());
+        
+        return null;
+    }
+
+    public async Task<bool> DeleteDirectory(string directory)
+    {
+        HttpContent content = JsonContent.Create(directory);
+        var response = await _httpClient.PutAsync(
+            "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/delete-directory", content);
+        if (response.IsSuccessStatusCode)
+            return true;
+        return false;
     }
 }

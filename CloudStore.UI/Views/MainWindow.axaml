@@ -86,6 +86,21 @@
                                         Margin="5"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
+                                        Command="{ReflectionBinding #items.DataContext.GoToDirectoryCommand}"
+                                        CornerRadius="10"
+                                        IsVisible="{Binding ButtonGoToIsVisible}">
+                                        <Button.Content>
+
+                                            <Image
+                                                Width="20"
+                                                Height="20"
+                                                Source="avares://CloudStore.UI/Assets/Folder2Open.ico" />
+                                        </Button.Content>
+                                    </Button>
+                                    <Button
+                                        Margin="5"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
                                         BorderThickness="1"
                                         Command="{ReflectionBinding #items.DataContext.DownloadFileCommand}"
                                         CornerRadius="10"
@@ -127,21 +142,7 @@
                                                 Source="avares://CloudStore.UI/Assets/TrashCan.ico" />
                                         </Button.Content>
                                     </Button>
-                                    <Button
-                                        Margin="5"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Command="{ReflectionBinding #items.DataContext.GoToDirectoryCommand}"
-                                        CornerRadius="10"
-                                        IsVisible="{Binding ButtonGoToIsVisible}">
-                                        <Button.Content>
 
-                                            <Image
-                                                Width="20"
-                                                Height="20"
-                                                Source="avares://CloudStore.UI/Assets/Folder2Open.ico" />
-                                        </Button.Content>
-                                    </Button>
                                 </StackPanel>
                             </Grid>
                         </Border>

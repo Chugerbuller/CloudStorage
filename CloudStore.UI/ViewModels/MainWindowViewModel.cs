@@ -105,6 +105,19 @@ namespace CloudStore.UI.ViewModels
                 else
                     return;
             }
+            else if (SelectedFileOrDirectory is DirectoryForList directory)
+            {
+                bool res;
+                DirectoryForList? deleteDir;
+                if (UserPath == "")
+                    res = await _apiFileService.DeleteDirectory(directory.Name);
+                else
+                    res = await _apiFileService.DeleteDirectory(UserPath + "\\" + directory.Name);
+
+                if (!res)
+                    return;
+                FilesAndDirectorys.Remove(directory);
+            }
         }
 
         public async Task DownloadFile()
@@ -226,6 +239,19 @@ namespace CloudStore.UI.ViewModels
                 FilesAndDirectorys.Replace(file, updateFile);
                 EnableEditFile = !EnableEditFile;
             }
+            else if (SelectedFileOrDirectory is DirectoryForList directory)
+            {
+                DirectoryForList? updatedDir;
+                if (UserPath == "")
+                    updatedDir = await _apiFileService.ChangeDirectoryName(directory.Name, newFileName);
+                else
+                    updatedDir = await _apiFileService.ChangeDirectoryName(UserPath + '\\' + directory.Name, newFileName);
+
+                if (updatedDir is null)
+                    return;
+                FilesAndDirectorys.Replace(directory, updatedDir);
+                EnableEditFile = !EnableEditFile;
+            }
             else
                 return;
         }
@@ -233,11 +259,15 @@ namespace CloudStore.UI.ViewModels
         public void MakeVisibleEditFile()
         {
             if (SelectedFileOrDirectory != null)
-                newFileName = SelectedFileOrDirectory.Name.Split('.')[0];
-            else 
+            {
+                if (SelectedFileOrDirectory is FileForList file)
+                    newFileName = file.Name.Split('.')[0];
+                else if (SelectedFileOrDirectory is DirectoryForList directory)
+                    newFileName = directory.Name.Split('\\')[^1];
+            }
+            else
                 return;
             EnableEditFile = !EnableEditFile;
-           
         }
 
         public void LogOut()

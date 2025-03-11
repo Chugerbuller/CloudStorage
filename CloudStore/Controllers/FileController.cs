@@ -315,6 +315,70 @@ public class FileController : ControllerBase
         return Ok(res);
     }
 
+    [HttpPut("api-key:{apiKey}/rename-directory/{newDirectoryName}")]
+    public async Task<IActionResult> RenameDirectory(string apiKey, string newDirectoryName, [FromBody] string oldDirectory)
+    {
+        if (string.IsNullOrWhiteSpace(apiKey))
+            return BadRequest();
+
+        bool isValid = _apiKeyValidation.IsValidApiKey(apiKey);
+        if (!isValid)
+            return Unauthorized();
+
+        var user = _dbUserHelper.GetUserByApiKey(apiKey);
+
+        if (string.IsNullOrWhiteSpace(oldDirectory))
+            return BadRequest();
+
+        var temp = Path.Combine(_userDirectory, user.UserDirectory);
+        var oldPath = Path.Combine(temp, oldDirectory);
+        var splitOldPath = oldPath.Split('\\');
+        splitOldPath[^1] = newDirectoryName;
+        var newPath = string.Join('\\', splitOldPath);
+
+        try
+        {
+            Directory.Move(oldPath, newPath);
+        }
+        catch (IOException)
+        {
+            return BadRequest("Server problem");
+        }
+        return Ok(Path.GetRelativePath(temp, newPath));
+    }
+
+    [HttpPut("api-key:{apiKey}/delete-directory")]
+    public async Task<IActionResult> DeleteDirectory(string apiKey, [FromBody] string directory)
+    {
+        if (string.IsNullOrWhiteSpace(apiKey))
+            return BadRequest();
+
+        bool isValid = _apiKeyValidation.IsValidApiKey(apiKey);
+        if (!isValid)
+            return Unauthorized();
+
+        var user = _dbUserHelper.GetUserByApiKey(apiKey);
+
+        if (string.IsNullOrWhiteSpace(directory))
+            return BadRequest();
+
+        var temp = Path.Combine(_userDirectory, user.UserDirectory);
+        var path = Path.Combine(temp, directory);
+
+        if (!Directory.Exists(path))
+            return BadRequest("This directory isn't exist!");
+        try
+        {
+            Directory.Delete(path, true);
+        }
+        catch (IOException)
+        {
+            return BadRequest("Server problem");
+        }
+
+        return Ok("Directory was deleted");
+    }
+
     [HttpGet("api-key:{apiKey}/scan-directory")]
     public async Task<IActionResult> ScanDirectory(string apiKey)
     {
