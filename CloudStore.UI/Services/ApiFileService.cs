@@ -156,12 +156,15 @@ public class ApiFileService
 
     public async Task<CloudStoreUiListItem?> UpdateFile(FileModel file)
     {
+        HttpContent content = JsonContent.Create(file.Name);
+       
         var response =
-            await _httpClient.PutAsJsonAsync(
-                "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/update-file", file);
+            await _httpClient.PutAsync(
+                "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + $"/update-file/{file.Id}", content);
         if (response.IsSuccessStatusCode)
         {
-            var updateFile = JsonSerializer.Deserialize<FileModel>(await response.Content.ReadAsStreamAsync());
+            var updateFile = await response.Content.ReadFromJsonAsync<FileModel>();
+           
             return new FileForList(updateFile);
         }
         else return null;

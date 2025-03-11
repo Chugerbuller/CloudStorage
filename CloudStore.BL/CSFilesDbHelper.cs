@@ -42,10 +42,29 @@ namespace CloudStore.DAL
                     var newPath = temp.Path.Split('\\');
                     newPath[^1] = file.Name;
                     temp.Path = string.Join('\\', newPath);
-                }    
+                }
                 temp.Extension = file.Extension;
                 temp.Path = file.Path;
-                
+
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+                throw new NullReferenceException();
+        }
+
+        public async Task UpdateFileName(int id, string fileName)
+        {
+            var temp = await _dbContext.Files.SingleOrDefaultAsync(f => f.Id == id);
+            if (temp is not null)
+            {
+                if (fileName != temp.Name)
+                {
+                    temp.Name = fileName;
+                    var newPath = temp.Path.Split('\\');
+                    newPath[^1] = fileName;
+                    temp.Path = string.Join('\\', newPath);
+                }
+
                 await _dbContext.SaveChangesAsync();
             }
             else

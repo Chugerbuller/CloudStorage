@@ -1,5 +1,4 @@
-﻿using System.Net;
-using CloudStore.BL;
+﻿using CloudStore.BL;
 using CloudStore.BL.Models;
 using CloudStore.DAL;
 using CloudStore.WebApi.apiKeyValidation;
@@ -135,8 +134,8 @@ public class FileController : ControllerBase
         return Ok();
     }
 
-    [HttpPut("api-key:{apiKey}/update-file")]
-    public async Task<IActionResult> Put(string apiKey, [FromBody] FileModel file)
+    [HttpPut("api-key:{apiKey}/update-file/{id}")]
+    public async Task<IActionResult> UpdateFile(string apiKey, int id, [FromBody] string newFileName)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
@@ -145,19 +144,23 @@ public class FileController : ControllerBase
         if (!isValid)
             return Unauthorized();
         var user = _dbUserHelper.GetUserByApiKey(apiKey);
-        var oldFile = await _dbHelper.GetFileByIdAsync(file.Id, user);
-        await _dbHelper.UpdateFile(file);
+        var oldFile = await _dbHelper.GetFileByIdAsync(id, user);
+        if (oldFile == null)
+            return BadRequest();
+        var oldPath = oldFile.Path;
+
+        await _dbHelper.UpdateFileName(oldFile.Id, newFileName);
 
         try
         {
-            System.IO.File.Replace(oldFile.Path, file.Path, null);
+            System.IO.File.Move(oldPath, oldFile.Path);
         }
         catch (IOException ex)
         {
             return BadRequest(ex.Message);
         }
 
-        return Ok(file);
+        return Ok(oldFile);
     }
 
     [HttpDelete("api-key:{apiKey}/{id}")]

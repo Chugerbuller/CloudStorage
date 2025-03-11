@@ -35,6 +35,7 @@ namespace CloudStore.UI.ViewModels
 
         [Reactive]
         public string UserPath { get; set; } = "";
+
         [Reactive]
         public bool EnableEditFile { get; set; } = false;
 
@@ -47,6 +48,9 @@ namespace CloudStore.UI.ViewModels
         [Reactive]
         public string NewDirectory { get; set; } = "";
 
+        [Reactive]
+        public string newFileName { get; set; } = "";
+
         public event EventHandler? Closed;
 
         public User? User { get; set; }
@@ -55,7 +59,7 @@ namespace CloudStore.UI.ViewModels
         {
             User = user;
             CloseWindowCommand = ReactiveCommand.Create(() => Closed(this, new EventArgs()));
-            
+
             AvailableEditFileCommand = ReactiveCommand.Create(MakeVisibleEditFile);
             ToPrevDirectoryCommand = ReactiveCommand.CreateFromTask(ToPrevDirecotry);
             GoToDirectoryCommand = ReactiveCommand.CreateFromTask(GoToDirectory);
@@ -163,7 +167,6 @@ namespace CloudStore.UI.ViewModels
 
         public void MakeDirectoryShow()
         {
-            
             MakeDirectoryVisibility = !MakeDirectoryVisibility;
         }
 
@@ -189,7 +192,7 @@ namespace CloudStore.UI.ViewModels
                 return;
 
             var directoryList = UserPath.Split('\\');
-        
+
             var newDirectoryList = new string[directoryList.Length - 1];
             for (int i = 0; i <= directoryList.Length - 2; i++)
             {
@@ -211,24 +214,32 @@ namespace CloudStore.UI.ViewModels
             var items = await _apiFileService.GetStartingScreenItems();
             FilesAndDirectorys.AddRange(items);
         }
+
         public async Task EditFile()
         {
             if (SelectedFileOrDirectory is FileForList file)
             {
+                file.Name = newFileName + '.' + file.Extension;
                 var updateFile = await _apiFileService.UpdateFile(file.File);
                 if (updateFile is null)
                     return;
-                FilesAndDirectorys.Replace<CloudStoreUiListItem>(file,updateFile);
+                FilesAndDirectorys.Replace(file, updateFile);
                 EnableEditFile = !EnableEditFile;
             }
-            else 
+            else
                 return;
         }
 
         public void MakeVisibleEditFile()
         {
+            if (SelectedFileOrDirectory != null)
+                newFileName = SelectedFileOrDirectory.Name.Split('.')[0];
+            else 
+                return;
             EnableEditFile = !EnableEditFile;
+           
         }
+
         public void LogOut()
         {
             /*  var appCfg = JsonSerializer.Deserialize<ApplicationConfig>(File.ReadAllText("Configs\\ApplicationConfig.json"));

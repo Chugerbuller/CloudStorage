@@ -69,19 +69,14 @@
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Center"
                                         Source="{Binding ImageSource}" />
-                                    <TextBox
+                                    <TextBlock
                                         Margin="10,5,5,5"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Center"
                                         FontFamily="Bold"
                                         FontSize="15"
-                                        IsEnabled="{ReflectionBinding #items.DataContext.EnableEditFile}"
                                         Text="{Binding Name}" />
-                                    <Button
-                                        IsVisible="{ReflectionBinding #items.DataContext.EnableEditFile}"
-                                        Margin="5"
-                                        Command="{ReflectionBinding #items.DataContext.EditFileCommand}"
-                                        Content="Ок" />
+
                                 </StackPanel>
                                 <StackPanel
                                     Grid.Column="1"
@@ -198,6 +193,19 @@
                     Margin="5"
                     Command="{Binding MakeDirectoryCommand}"
                     Content="Ок" />
+
+
+            </StackPanel>
+            <StackPanel IsVisible="{Binding EnableEditFile}" Orientation="Vertical">
+                <TextBox
+                    Margin="5"
+                    IsVisible="{Binding EnableEditFile}"
+                    Text="{Binding newFileName}" />
+                <Button
+                    Margin="5"
+                    Command="{Binding EditFileCommand}"
+                    Content="Ок"
+                    IsVisible="{Binding EnableEditFile}" />
             </StackPanel>
         </StackPanel>
         <StackPanel
