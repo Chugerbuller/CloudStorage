@@ -1,4 +1,5 @@
-﻿using CloudStore.BL;
+﻿using System.Net;
+using CloudStore.BL;
 using CloudStore.BL.Models;
 using CloudStore.DAL;
 using CloudStore.WebApi.apiKeyValidation;
@@ -156,7 +157,7 @@ public class FileController : ControllerBase
             return BadRequest(ex.Message);
         }
 
-        return Ok();
+        return Ok(file);
     }
 
     [HttpDelete("api-key:{apiKey}/{id}")]

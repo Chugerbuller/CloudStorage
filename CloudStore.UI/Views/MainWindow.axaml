@@ -29,7 +29,7 @@
                 <Button
                     Grid.Column="0"
                     Padding="0"
-                    Command="{Binding ToPrevDirecotryCommand}"
+                    Command="{Binding ToPrevDirectoryCommand}"
                     Content="..." />
                 <TextBlock
                     Grid.Column="1"
@@ -77,6 +77,11 @@
                                         FontSize="15"
                                         IsEnabled="{ReflectionBinding #items.DataContext.EnableEditFile}"
                                         Text="{Binding Name}" />
+                                    <Button
+                                        IsVisible="{ReflectionBinding #items.DataContext.EnableEditFile}"
+                                        Margin="5"
+                                        Command="{ReflectionBinding #items.DataContext.EditFileCommand}"
+                                        Content="Ок" />
                                 </StackPanel>
                                 <StackPanel
                                     Grid.Column="1"
@@ -102,7 +107,7 @@
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         BorderThickness="1.5"
-                                        Command="{ReflectionBinding #items.DataContext.EditFileCommand}"
+                                        Command="{ReflectionBinding #items.DataContext.AvailableEditFileCommand}"
                                         CornerRadius="10"
                                         IsVisible="{Binding ButtonEditIsVisible}">
                                         <Button.Content>

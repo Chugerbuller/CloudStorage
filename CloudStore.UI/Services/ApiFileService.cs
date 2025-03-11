@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -153,9 +154,17 @@ public class ApiFileService
         };
     }
 
-    public async Task<CloudStoreUiListItem?> ChangeFile(FileModel file)
+    public async Task<CloudStoreUiListItem?> UpdateFile(FileModel file)
     {
-        return null;
+        var response =
+            await _httpClient.PutAsJsonAsync(
+                "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/update-file", file);
+        if (response.IsSuccessStatusCode)
+        {
+            var updateFile = JsonSerializer.Deserialize<FileModel>(await response.Content.ReadAsStreamAsync());
+            return new FileForList(updateFile);
+        }
+        else return null;
     }
 
     public async Task<DirectoryForList?> MakeDirectory(string directory)

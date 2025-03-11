@@ -19,12 +19,13 @@ namespace CloudStore.UI.ViewModels
     public class MainWindowViewModel : ViewModelBase, ICloseable
     {
         private readonly ApiFileService _apiFileService;
-        public ReactiveCommand<Unit, Unit> ToPrevDirecotryCommand { get; }
+        public ReactiveCommand<Unit, Unit> ToPrevDirectoryCommand { get; }
         public ReactiveCommand<Unit, Unit> CloseWindowCommand { get; }
         public ReactiveCommand<Unit, Unit> SendFileCommand { get; }
         public ReactiveCommand<Unit, Unit> DownloadFileCommand { get; }
         public ReactiveCommand<Unit, Unit> DeleteFileCommand { get; }
         public ReactiveCommand<Unit, Unit> EditFileCommand { get; }
+        public ReactiveCommand<Unit, Unit> AvailableEditFileCommand { get; }
         public ReactiveCommand<Unit, Unit> MakeDirectoryCommand { get; }
         public ReactiveCommand<Unit, Unit> MakeDirectoryShowCommand { get; }
         public ReactiveCommand<Unit, Unit> GoToDirectoryCommand { get; }
@@ -54,8 +55,9 @@ namespace CloudStore.UI.ViewModels
         {
             User = user;
             CloseWindowCommand = ReactiveCommand.Create(() => Closed(this, new EventArgs()));
-
-            ToPrevDirecotryCommand = ReactiveCommand.CreateFromTask(ToPrevDirecotry);
+            
+            AvailableEditFileCommand = ReactiveCommand.Create(MakeVisibleEditFile);
+            ToPrevDirectoryCommand = ReactiveCommand.CreateFromTask(ToPrevDirecotry);
             GoToDirectoryCommand = ReactiveCommand.CreateFromTask(GoToDirectory);
             SendFileCommand = ReactiveCommand.CreateFromTask(UploadFile);
             DownloadFileCommand = ReactiveCommand.CreateFromTask(DownloadFile);
@@ -63,7 +65,7 @@ namespace CloudStore.UI.ViewModels
             DeleteFileCommand = ReactiveCommand.CreateFromTask(DeleteFile);
             MakeDirectoryShowCommand = ReactiveCommand.Create(MakeDirectoryShow);
             MakeDirectoryCommand = ReactiveCommand.CreateFromTask(MakeDirectory);
-            //EditFileCommand = ReactiveCommand.CreateFromTask(EditFile);
+            EditFileCommand = ReactiveCommand.CreateFromTask(EditFile);
             _apiFileService = new(User);
             _initList();
         }
@@ -161,6 +163,7 @@ namespace CloudStore.UI.ViewModels
 
         public void MakeDirectoryShow()
         {
+            
             MakeDirectoryVisibility = !MakeDirectoryVisibility;
         }
 
@@ -210,6 +213,21 @@ namespace CloudStore.UI.ViewModels
         }
         public async Task EditFile()
         {
+            if (SelectedFileOrDirectory is FileForList file)
+            {
+                var updateFile = await _apiFileService.UpdateFile(file.File);
+                if (updateFile is null)
+                    return;
+                FilesAndDirectorys.Replace<CloudStoreUiListItem>(file,updateFile);
+                EnableEditFile = !EnableEditFile;
+            }
+            else 
+                return;
+        }
+
+        public void MakeVisibleEditFile()
+        {
+            EnableEditFile = !EnableEditFile;
         }
         public void LogOut()
         {
