@@ -34,4 +34,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Files\208c3f7e-1919-487c-af24-d79b2bf7b008\dmc3\" />
+  </ItemGroup>
+
 </Project>

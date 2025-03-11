@@ -8,6 +8,7 @@ namespace CloudStore.Controllers;
 
 [Route("cloud-store-api/[controller]")]
 [ApiController]
+[DisableRequestSizeLimit]
 public class FileController : ControllerBase
 {
     private readonly IWebHostEnvironment _webHostEnvironment;

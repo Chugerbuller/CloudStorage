@@ -23,6 +23,8 @@ public class ApiFileService
         _user = user;
         _httpClient = new HttpClient();
         _webClient = new WebClient();
+        _httpClient.DefaultRequestHeaders.ConnectionClose = true;
+        
     }
 
     public async Task<List<CloudStoreUiListItem>?> GetStartingScreenItemsAsync()
