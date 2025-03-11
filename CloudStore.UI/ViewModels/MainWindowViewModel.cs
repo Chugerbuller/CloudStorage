@@ -27,6 +27,8 @@ namespace CloudStore.UI.ViewModels
 
         #region ReactiveCommands
         public ReactiveCommand<Unit, Unit> ToPrevDirectoryCommand { get; }
+        public ReactiveCommand<Unit, Unit> CancelNewFolderCommand { get; }
+        public ReactiveCommand<Unit, Unit> CancelEditCommand { get; }
         public ReactiveCommand<Unit, Unit> CloseWindowCommand { get; }
         public ReactiveCommand<Unit, Unit> SendFileCommand { get; }
         public ReactiveCommand<Unit, Unit> DownloadFileCommand { get; }
@@ -74,7 +76,9 @@ namespace CloudStore.UI.ViewModels
         {
             User = user;
             CloseWindowCommand = ReactiveCommand.Create(() => Closed(this, new EventArgs()));
-
+    
+            CancelEditCommand = ReactiveCommand.Create(CancelEdit);
+            CancelNewFolderCommand = ReactiveCommand.Create(CancelNewFolder);
             AvailableEditFileCommand = ReactiveCommand.Create(MakeVisibleEdit);
             ToPrevDirectoryCommand = ReactiveCommand.CreateFromTask(ToPrevDirectory);
             GoToDirectoryCommand = ReactiveCommand.CreateFromTask(GoToDirectory);
@@ -217,6 +221,16 @@ namespace CloudStore.UI.ViewModels
             MakeDirectoryVisibility = !MakeDirectoryVisibility;
         }
 
+        public void CancelNewFolder()
+        {
+            MakeDirectoryVisibility = !MakeDirectoryVisibility;
+            NewDirectory = "";
+        }
+        public void CancelEdit()
+        {
+            EnableEditFile = !EnableEditFile;
+            newFileName = "";
+        }
         public async Task ToPrevDirectory()
         {
             if (UserPath == "")

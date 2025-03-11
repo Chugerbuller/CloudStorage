@@ -7,7 +7,7 @@
     xmlns:vm="using:CloudStore.UI.ViewModels"
     Title="CloudStore.UI"
     MinWidth="800"
-    MinHeight="1050"
+    MinHeight="700"
     x:DataType="vm:MainWindowViewModel"
     Icon="/Assets/avalonia-logo.ico"
     mc:Ignorable="d">
@@ -18,15 +18,18 @@
     <Grid
         Margin="10"
         ColumnDefinitions="8*,2*"
-        RowDefinitions="0.5*,7*">
+        RowDefinitions="0.75*,7*">
         <Border
             Margin="10"
             Padding="5,0,5,0"
             BorderBrush="rgba(100,0,200,50)"
             BorderThickness="1"
             CornerRadius="3">
-            <Grid ColumnDefinitions="*,30*">
+            <Grid ColumnDefinitions="*,25*">
                 <Button
+                    x:Name="ButtonToPrevDir"
+                    Margin="5"
+                    MinWidth="35"
                     Grid.Column="0"
                     Padding="0"
                     Command="{Binding ToPrevDirectoryCommand}"
@@ -190,23 +193,34 @@
                 IsVisible="{Binding MakeDirectoryVisibility}"
                 Orientation="Vertical">
                 <TextBox Margin="5" Text="{Binding NewDirectory}" />
+                <StackPanel Orientation="Horizontal">
                 <Button
                     Margin="5"
                     Command="{Binding MakeDirectoryCommand}"
                     Content="Ок" />
-
+                <Button
+                    Margin="5"
+                    Command="{Binding CancelNewFolderCommand}"
+                    Content="Отмена"></Button>
+                </StackPanel>
 
             </StackPanel>
-            <StackPanel IsVisible="{Binding EnableEditFile}" Orientation="Vertical">
+            <StackPanel IsVisible="{Binding EnableEditFile}" Orientation="Vertical"  HorizontalAlignment="Center">
                 <TextBox
                     Margin="5"
-                    IsVisible="{Binding EnableEditFile}"
+                    
                     Text="{Binding newFileName}" />
+                <StackPanel Orientation="Horizontal">
                 <Button
                     Margin="5"
                     Command="{Binding EditFileCommand}"
                     Content="Ок"
-                    IsVisible="{Binding EnableEditFile}" />
+                    />
+                <Button
+                    Margin="5"
+                    Command="{Binding CancelEditCommand}"
+                    Content="Отмена"></Button>
+                </StackPanel>
             </StackPanel>
         </StackPanel>
         <StackPanel
@@ -215,20 +229,20 @@
             Margin="5"
             Orientation="Horizontal">
             <TextBox
-                Margin="10"
+                Margin="5"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 FontFamily="Bold"
                 Text="{Binding User.Login}" />
             <Button
-                Margin="10"
+                Margin="7"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Command="{Binding LogOutCommand}">
                 <Button.Content>
                     <Image
-                        Width="20"
-                        Height="20"
+                        Width="15"
+                        Height="15"
                         Source="avares://CloudStore.UI/Assets/logoutI.ico" />
                 </Button.Content>
             </Button>
