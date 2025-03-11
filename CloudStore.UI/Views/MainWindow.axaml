@@ -7,7 +7,7 @@
     xmlns:vm="using:CloudStore.UI.ViewModels"
     Title="CloudStore.UI"
     MinWidth="800"
-    MinHeight="600"
+    MinHeight="1050"
     x:DataType="vm:MainWindowViewModel"
     Icon="/Assets/avalonia-logo.ico"
     mc:Ignorable="d">
@@ -212,17 +212,24 @@
         <StackPanel
             Grid.Row="0"
             Grid.Column="1"
+            Margin="5"
             Orientation="Horizontal">
-            <Label
-                HorizontalContentAlignment="Center"
-                VerticalContentAlignment="Center"
-                Content="{Binding User.Login}" />
-            <Button Background="rgba(0,0,0,255)">
+            <TextBox
+                Margin="10"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="Bold"
+                Text="{Binding User.Login}" />
+            <Button
+                Margin="10"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Command="{Binding LogOutCommand}">
                 <Button.Content>
                     <Image
-                        Width="15"
-                        Height="15"
-                        Source="avares://CloudStore.UI/Assets/leave.ico" />
+                        Width="20"
+                        Height="20"
+                        Source="avares://CloudStore.UI/Assets/logoutI.ico" />
                 </Button.Content>
             </Button>
         </StackPanel>

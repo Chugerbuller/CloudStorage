@@ -84,7 +84,7 @@ public class FileController : ControllerBase
     }
 
     [HttpGet("api-key:{apiKey}/all-files-from-directory")]
-    public async Task<IActionResult> GetAllFilesFromDirectory(string apiKey)
+    public async Task<IActionResult> GetAllFilesFromDirectoryAsync(string apiKey)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
@@ -101,7 +101,7 @@ public class FileController : ControllerBase
     }
 
     [HttpGet("api-key:{apiKey}/all-files-from-directory/{directory}")]
-    public async Task<IActionResult> GetAllFilesFromDirectory(string apiKey, string directory)
+    public async Task<IActionResult> GetAllFilesFromDirectoryAsync(string apiKey, string directory)
     {
         directory = string.Join("\\", directory.Split("|"));
         if (string.IsNullOrWhiteSpace(apiKey))
@@ -120,7 +120,7 @@ public class FileController : ControllerBase
     }
 
     [HttpPost("api-key:{apiKey}")]
-    public async Task<IActionResult> Post(string apiKey, [FromBody] FileModel file)
+    public async Task<IActionResult> PostAsync(string apiKey, [FromBody] FileModel file)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
@@ -135,7 +135,7 @@ public class FileController : ControllerBase
     }
 
     [HttpPut("api-key:{apiKey}/update-file/{id}")]
-    public async Task<IActionResult> UpdateFile(string apiKey, int id, [FromBody] string newFileName)
+    public async Task<IActionResult> UpdateFileAsync(string apiKey, int id, [FromBody] string newFileName)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
@@ -164,7 +164,7 @@ public class FileController : ControllerBase
     }
 
     [HttpDelete("api-key:{apiKey}/{id}")]
-    public async Task<IActionResult> Delete(string apiKey, int id)
+    public async Task<IActionResult> DeleteAsync(string apiKey, int id)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
@@ -290,7 +290,7 @@ public class FileController : ControllerBase
     }
 
     [HttpGet("api-key:{apiKey}/scan-directory/{directory}")]
-    public async Task<IActionResult> ScanDirectory(string apiKey, string directory)
+    public async Task<IActionResult> ScanDirectoryAsync(string apiKey, string directory)
     {
         directory = string.Join("\\", directory.Split("|"));
         if (string.IsNullOrWhiteSpace(apiKey))
@@ -316,7 +316,7 @@ public class FileController : ControllerBase
     }
 
     [HttpPut("api-key:{apiKey}/rename-directory/{newDirectoryName}")]
-    public async Task<IActionResult> RenameDirectory(string apiKey, string newDirectoryName, [FromBody] string oldDirectory)
+    public async Task<IActionResult> RenameDirectoryAsync(string apiKey, string newDirectoryName, [FromBody] string oldDirectory)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
@@ -348,7 +348,7 @@ public class FileController : ControllerBase
     }
 
     [HttpPut("api-key:{apiKey}/delete-directory")]
-    public async Task<IActionResult> DeleteDirectory(string apiKey, [FromBody] string directory)
+    public async Task<IActionResult> DeleteDirectoryAsync(string apiKey, [FromBody] string directory)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();
@@ -380,7 +380,7 @@ public class FileController : ControllerBase
     }
 
     [HttpGet("api-key:{apiKey}/scan-directory")]
-    public async Task<IActionResult> ScanDirectory(string apiKey)
+    public async Task<IActionResult> ScanDirectoryAsync(string apiKey)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
             return BadRequest();

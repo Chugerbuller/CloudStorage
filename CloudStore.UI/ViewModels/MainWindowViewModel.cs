@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
 using CloudStore.BL.Models;
+using CloudStore.UI.Configs;
 using CloudStore.UI.Models;
 using CloudStore.UI.Services;
 using DynamicData;
@@ -12,13 +13,19 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reactive;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace CloudStore.UI.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase, ICloseable
     {
+        #region ReadonlyProps
         private readonly ApiFileService _apiFileService;
+        #endregion
+
+        #region ReactiveCommands
         public ReactiveCommand<Unit, Unit> ToPrevDirectoryCommand { get; }
         public ReactiveCommand<Unit, Unit> CloseWindowCommand { get; }
         public ReactiveCommand<Unit, Unit> SendFileCommand { get; }
@@ -30,7 +37,9 @@ namespace CloudStore.UI.ViewModels
         public ReactiveCommand<Unit, Unit> MakeDirectoryShowCommand { get; }
         public ReactiveCommand<Unit, Unit> GoToDirectoryCommand { get; }
         public ReactiveCommand<Unit, Unit> LogOutCommand { get; }
+        #endregion
 
+        #region ReactiveProps
         public ObservableCollection<CloudStoreUiListItem?> FilesAndDirectorys { get; set; } = [];
 
         [Reactive]
@@ -50,18 +59,24 @@ namespace CloudStore.UI.ViewModels
 
         [Reactive]
         public string newFileName { get; set; } = "";
+        #endregion
 
+        #region Events
         public event EventHandler? Closed;
+        #endregion
 
+        #region Props
         public User? User { get; set; }
+        #endregion
 
+        #region Ctor
         public MainWindowViewModel(User? user)
         {
             User = user;
             CloseWindowCommand = ReactiveCommand.Create(() => Closed(this, new EventArgs()));
 
-            AvailableEditFileCommand = ReactiveCommand.Create(MakeVisibleEditFile);
-            ToPrevDirectoryCommand = ReactiveCommand.CreateFromTask(ToPrevDirecotry);
+            AvailableEditFileCommand = ReactiveCommand.Create(MakeVisibleEdit);
+            ToPrevDirectoryCommand = ReactiveCommand.CreateFromTask(ToPrevDirectory);
             GoToDirectoryCommand = ReactiveCommand.CreateFromTask(GoToDirectory);
             SendFileCommand = ReactiveCommand.CreateFromTask(UploadFile);
             DownloadFileCommand = ReactiveCommand.CreateFromTask(DownloadFile);
@@ -69,16 +84,19 @@ namespace CloudStore.UI.ViewModels
             DeleteFileCommand = ReactiveCommand.CreateFromTask(DeleteFile);
             MakeDirectoryShowCommand = ReactiveCommand.Create(MakeDirectoryShow);
             MakeDirectoryCommand = ReactiveCommand.CreateFromTask(MakeDirectory);
-            EditFileCommand = ReactiveCommand.CreateFromTask(EditFile);
+            EditFileCommand = ReactiveCommand.CreateFromTask(EditDirOrFile);
             _apiFileService = new(User);
             _initList();
         }
+        #endregion
+
+        #region Methods
 
         public async Task GoToDirectory()
         {
             if (SelectedFileOrDirectory is DirectoryForList directory)
             {
-                var newItems = await _apiFileService.GetItemsFromDirectory(Path.Combine(UserPath, directory.Directory));
+                var newItems = await _apiFileService.GetItemsFromDirectoryAsync(Path.Combine(UserPath, directory.Directory));
 
                 if (newItems == null)
                     return;
@@ -98,7 +116,7 @@ namespace CloudStore.UI.ViewModels
                 return;
             if (SelectedFileOrDirectory is FileForList file)
             {
-                if (await _apiFileService.DeleteFile(file.File))
+                if (await _apiFileService.DeleteFileAsync(file.File))
                 {
                     FilesAndDirectorys.Remove(file);
                 }
@@ -110,9 +128,9 @@ namespace CloudStore.UI.ViewModels
                 bool res;
                 DirectoryForList? deleteDir;
                 if (UserPath == "")
-                    res = await _apiFileService.DeleteDirectory(directory.Name);
+                    res = await _apiFileService.DeleteDirectoryAsync(directory.Name);
                 else
-                    res = await _apiFileService.DeleteDirectory(UserPath + "\\" + directory.Name);
+                    res = await _apiFileService.DeleteDirectoryAsync(UserPath + "\\" + directory.Name);
 
                 if (!res)
                     return;
@@ -134,7 +152,7 @@ namespace CloudStore.UI.ViewModels
                     if (directory is null)
                         return;
 
-                    await _apiFileService.DownloadFile(file.File, directory);
+                    await _apiFileService.DownloadFileAsync(file.File, directory);
                     return;
                 }
             }
@@ -161,7 +179,7 @@ namespace CloudStore.UI.ViewModels
                 if (directory is null)
                     return;
 
-                var res = await _apiFileService.UploadFile(directory[0], UserPath);
+                var res = await _apiFileService.UploadFileAsync(directory[0], UserPath);
                 if (res is null)
                     return;
                 FilesAndDirectorys.Add(res);
@@ -187,9 +205,9 @@ namespace CloudStore.UI.ViewModels
         {
             DirectoryForList? newDirectory;
             if (UserPath == "")
-                newDirectory = await _apiFileService.MakeDirectory($"{NewDirectory}");
+                newDirectory = await _apiFileService.MakeDirectoryAsync($"{NewDirectory}");
 
-            newDirectory = await _apiFileService.MakeDirectory($@"{UserPath}\{NewDirectory}");
+            newDirectory = await _apiFileService.MakeDirectoryAsync($@"{UserPath}\{NewDirectory}");
 
             if (newDirectory is null)
                 return;
@@ -199,7 +217,7 @@ namespace CloudStore.UI.ViewModels
             MakeDirectoryVisibility = !MakeDirectoryVisibility;
         }
 
-        public async Task ToPrevDirecotry()
+        public async Task ToPrevDirectory()
         {
             if (UserPath == "")
                 return;
@@ -214,7 +232,7 @@ namespace CloudStore.UI.ViewModels
             var newDir = string.Join('\\', newDirectoryList);
             UserPath = newDir;
 
-            var newItems = await _apiFileService.GetItemsFromDirectory(UserPath);
+            var newItems = await _apiFileService.GetItemsFromDirectoryAsync(UserPath);
 
             if (newItems == null)
                 return;
@@ -224,16 +242,16 @@ namespace CloudStore.UI.ViewModels
 
         private async void _initList()
         {
-            var items = await _apiFileService.GetStartingScreenItems();
+            var items = await _apiFileService.GetStartingScreenItemsAsync();
             FilesAndDirectorys.AddRange(items);
         }
 
-        public async Task EditFile()
+        public async Task EditDirOrFile()
         {
             if (SelectedFileOrDirectory is FileForList file)
             {
                 file.Name = newFileName + '.' + file.Extension;
-                var updateFile = await _apiFileService.UpdateFile(file.File);
+                var updateFile = await _apiFileService.UpdateFileAsync(file.File);
                 if (updateFile is null)
                     return;
                 FilesAndDirectorys.Replace(file, updateFile);
@@ -243,9 +261,9 @@ namespace CloudStore.UI.ViewModels
             {
                 DirectoryForList? updatedDir;
                 if (UserPath == "")
-                    updatedDir = await _apiFileService.ChangeDirectoryName(directory.Name, newFileName);
+                    updatedDir = await _apiFileService.ChangeDirectoryNameAsync(directory.Name, newFileName);
                 else
-                    updatedDir = await _apiFileService.ChangeDirectoryName(UserPath + '\\' + directory.Name, newFileName);
+                    updatedDir = await _apiFileService.ChangeDirectoryNameAsync(UserPath + '\\' + directory.Name, newFileName);
 
                 if (updatedDir is null)
                     return;
@@ -256,7 +274,7 @@ namespace CloudStore.UI.ViewModels
                 return;
         }
 
-        public void MakeVisibleEditFile()
+        public void MakeVisibleEdit()
         {
             if (SelectedFileOrDirectory != null)
             {
@@ -272,13 +290,15 @@ namespace CloudStore.UI.ViewModels
 
         public void LogOut()
         {
-            /*  var appCfg = JsonSerializer.Deserialize<ApplicationConfig>(File.ReadAllText("Configs\\ApplicationConfig.json"));
-              appCfg.RememberUser = false;
-              var appJsonByte = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(appCfg));
-              using var writeAppCfg = new FileStream("Configs\\ApplicationConfig.json", FileMode.Truncate, FileAccess.Write);
-              writeAppCfg.Write(appJsonByte);
 
-              Closed(this, new EventArgs());*/
+            var appCfg = JsonSerializer.Deserialize<ApplicationConfig>(File.ReadAllText("Configs\\ApplicationConfig.json"));
+            appCfg.RememberUser = false;
+            var appJsonByte = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(appCfg));
+            using var writeAppCfg = new FileStream("Configs\\ApplicationConfig.json", FileMode.Truncate, FileAccess.Write);
+            writeAppCfg.Write(appJsonByte);
+
+            Closed(this, new EventArgs());
         }
+        #endregion
     }
 }

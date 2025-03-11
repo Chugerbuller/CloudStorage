@@ -20,7 +20,7 @@ namespace CloudStore.UI.Services
             };
         }
 
-        public async Task<User?> RegistrationUser(string login, string password)
+        public async Task<User?> RegistrationUserAsync(string login, string password)
         {
             var res = await _httpClient.PostAsJsonAsync("create-user", new LoginAndPassword
             {

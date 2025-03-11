@@ -8,8 +8,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace CloudStore.UI.Services;
@@ -27,7 +25,7 @@ public class ApiFileService
         _webClient = new WebClient();
     }
 
-    public async Task<List<CloudStoreUiListItem>?> GetStartingScreenItems()
+    public async Task<List<CloudStoreUiListItem>?> GetStartingScreenItemsAsync()
     {
         var res = new List<CloudStoreUiListItem>();
         List<FileForList>? files;
@@ -53,7 +51,7 @@ public class ApiFileService
         return res;
     }
 
-    public async Task<List<CloudStoreUiListItem>?> GetItemsFromDirectory(string directory)
+    public async Task<List<CloudStoreUiListItem>?> GetItemsFromDirectoryAsync(string directory)
     {
         directory = string.Join("|", directory.Split("\\"));
         var res = new List<CloudStoreUiListItem>();
@@ -92,7 +90,7 @@ public class ApiFileService
         return res;
     }
 
-    public async Task<CloudStoreUiListItem?> UploadFile(string filePath, string directory = "")
+    public async Task<CloudStoreUiListItem?> UploadFileAsync(string filePath, string directory = "")
     {
         using var multipartFormContent = new MultipartFormDataContent();
         var url = "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey;
@@ -118,7 +116,7 @@ public class ApiFileService
         };
     }
 
-    public async Task<bool> DownloadFile(FileModel file, string path)
+    public async Task<bool> DownloadFileAsync(FileModel file, string path)
     {
         var response = await _httpClient
             .GetAsync("https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/download/" + file.Id);
@@ -141,7 +139,7 @@ public class ApiFileService
         }
     }
 
-    public async Task<bool> DeleteFile(FileModel file)
+    public async Task<bool> DeleteFileAsync(FileModel file)
     {
         var response = await _httpClient.DeleteAsync("https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/" + file.Id);
 
@@ -154,7 +152,7 @@ public class ApiFileService
         };
     }
 
-    public async Task<CloudStoreUiListItem?> UpdateFile(FileModel file)
+    public async Task<CloudStoreUiListItem?> UpdateFileAsync(FileModel file)
     {
         HttpContent content = JsonContent.Create(file.Name);
 
@@ -170,7 +168,7 @@ public class ApiFileService
         else return null;
     }
 
-    public async Task<DirectoryForList?> MakeDirectory(string directory)
+    public async Task<DirectoryForList?> MakeDirectoryAsync(string directory)
     {
         //https://localhost:7157/cloud-store-api/File/api-key:90546392470C5E893709E707FB70F88E/new-directory/testDir%2FDir
         var url = "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/new-directory";
@@ -183,7 +181,7 @@ public class ApiFileService
             return null;
     }
 
-    public async Task<DirectoryForList?> ChangeDirectoryName(string oldDirectory, string newDirectoryName)
+    public async Task<DirectoryForList?> ChangeDirectoryNameAsync(string oldDirectory, string newDirectoryName)
     {
         
         HttpContent content = JsonContent.Create(oldDirectory);
@@ -197,7 +195,7 @@ public class ApiFileService
         return null;
     }
 
-    public async Task<bool> DeleteDirectory(string directory)
+    public async Task<bool> DeleteDirectoryAsync(string directory)
     {
         HttpContent content = JsonContent.Create(directory);
         var response = await _httpClient.PutAsync(

@@ -32,6 +32,10 @@ namespace CloudStore.UI
                     {
                         DataContext = vm,
                     };
+                    vm.Closed += (s, e) =>
+                    {
+                        win.Close();
+                    };
                 }
                 else
                 {
@@ -52,6 +56,7 @@ namespace CloudStore.UI
                             DataContext = mwvm
                         };
                         win.Show();
+                        mwvm.Closed += (s, e) => win.Close();
                     };
                 }
             }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reactive;
 using System.Text;
@@ -9,9 +8,7 @@ using Avalonia.Input;
 using CloudStore.BL.Models;
 using CloudStore.UI.Configs;
 using CloudStore.UI.Exceptions;
-using CloudStore.UI.Models;
 using CloudStore.UI.Services;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -19,7 +16,9 @@ namespace CloudStore.UI.ViewModels;
 
 public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
 {
+    #region ReadonlyProps
     private readonly ApiUserService _userService;
+    #endregion
 
     #region ReactiveProps
 
@@ -67,10 +66,15 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
 
     #endregion ReactiveCommands
 
+    #region Events
     public event EventHandler? Closed;
+    #endregion
 
+    #region Props
     public User? User { get; private set; }
+    #endregion
 
+    #region Ctor
     public LoginAndRegistrationViewModel()
     {
         _userService = new ApiUserService();
@@ -82,7 +86,9 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
         });
         RegistrationUserCommand = ReactiveCommand.CreateFromTask(Registration);
     }
+    #endregion
 
+    #region Methods
     public async Task Authorize()
     {
         if (!LoginPartVisibility)
@@ -139,7 +145,7 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
         }
         try
         {
-            User = await _userService.RegistrationUser(LoginRegistration, PasswordRegistration);
+            User = await _userService.RegistrationUserAsync(LoginRegistration, PasswordRegistration);
 
             if (User is not null)
             {
@@ -159,4 +165,5 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
             return;
         }
     }
+    #endregion
 }
