@@ -20,9 +20,19 @@ public class ApiFileService
 
     public ApiFileService(User user)
     {
+        HttpClientHandler clientHandler = new HttpClientHandler();
+        clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+        ServicePointManager.Expect100Continue = true;
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+        ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+        
         _user = user;
-        _httpClient = new HttpClient();
-        _webClient = new WebClient();
+        _httpClient = new HttpClient(clientHandler);
+        _webClient = new WebClient()
+        {
+
+        };
+        
     }
 
     public async Task<List<CloudStoreUiListItem>?> GetStartingScreenItemsAsync()
@@ -93,7 +103,7 @@ public class ApiFileService
     public async Task<CloudStoreUiListItem?> UploadFileAsync(string filePath, string directory = "")
     {
         using var multipartFormContent = new MultipartFormDataContent();
-        var url = "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey;
+        var url = "localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey;
         if (directory is not null)
             url += $@"/upload-file/{string.Join("|", directory.Split("\\"))}";
         else
@@ -119,7 +129,7 @@ public class ApiFileService
     public async Task<bool> DownloadFileAsync(FileModel file, string path)
     {
         var response = await _httpClient
-            .GetAsync("https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/download/" + file.Id);
+            .GetAsync("localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/download/" + file.Id);
         switch (response.StatusCode)
         {
             case HttpStatusCode.OK:
@@ -158,7 +168,7 @@ public class ApiFileService
 
         var response =
             await _httpClient.PutAsync(
-                "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + $"/update-file/{file.Id}", content);
+               "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + $"/update-file/{file.Id}", content);
         if (response.IsSuccessStatusCode)
         {
             var updateFile = await response.Content.ReadFromJsonAsync<FileModel>();
