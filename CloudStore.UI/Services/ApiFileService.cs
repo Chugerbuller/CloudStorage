@@ -29,7 +29,7 @@ public class ApiFileService
         ServicePointManager.Expect100Continue = true;
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-        
+
         _user = user;
         _httpClient = new HttpClient(clientHandler);
         _webClient = new WebClient();
@@ -116,7 +116,6 @@ public class ApiFileService
         var extension = fileName.Split(".")[^1];
 
         await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-        
 
         var fileStreamContent = new StreamContent(fs);
         fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue($"application/{extension}");
@@ -131,6 +130,7 @@ public class ApiFileService
             _ => null,
         };
     }
+
     public async Task<CloudStoreUiListItem?> UploadLargeFile(string filePath, string? directory)
     {
         var fileName = filePath.Split('\\')[^1];
@@ -159,9 +159,31 @@ public class ApiFileService
         {
             Debug.WriteLine(ex.Message);
             return null;
-        }   
+        }
         return null;
+    }
 
+    public async Task<FileModel?> UploadLargeFile(stirng filePath)
+    {
+        await using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+        {
+            _signalRClient.StartAsync();
+            await _signalRClient.InvokeAsync("PrepareLargeFile", _user.ApiKey, filePath);
+
+            var size = fs.Length / 10240;
+            var lastSize = fs.Length % 10240;
+            for (var i = 0; i < size - 1; i++)
+            {
+                var package = new byte[10240];
+                fs.Read(package, 0, package.Length);
+                _signalRClient.InvokeAsync("UploadLargeFile", _user.ApiKey, package, false);
+            }
+            var lastPackage = new byte[lastSize];
+            fs.Read(lastPackage, 0, lastPackage.Length);
+            await _signalRClient.InvokeAsync("UploadLargeFile", _user.ApiKey, lastPackage, true);
+
+            return await _signalRClient.InvokeAsync<FileModel?>("FinishFileUploading", _user.ApiKey);
+        }
     }
 
     public async Task<bool> DownloadFileAsync(FileModel file, string path)
