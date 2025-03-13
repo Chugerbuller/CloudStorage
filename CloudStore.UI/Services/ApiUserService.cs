@@ -14,7 +14,9 @@ namespace CloudStore.UI.Services
 
         public ApiUserService()
         {
-            _httpClient = new HttpClient()
+            HttpClientHandler clientHandler = new HttpClientHandler();
+            clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+            _httpClient = new HttpClient(clientHandler)
             {
                 BaseAddress = new Uri("https://localhost:7157/cloud-store-api/User/")
             };
