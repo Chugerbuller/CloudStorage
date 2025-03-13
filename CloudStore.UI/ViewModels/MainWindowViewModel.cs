@@ -183,7 +183,9 @@ namespace CloudStore.UI.ViewModels
                 if (directory is null)
                     return;
 
-                var res = await _apiFileService.UploadFileAsync(directory[0], UserPath);
+                //var res = await _apiFileService.UploadFileAsync(directory[0], UserPath);
+                var res = await _apiFileService.UploadLargeFile(directory[0], UserPath);
+                
                 if (res is null)
                     return;
                 FilesAndDirectorys.Add(res);

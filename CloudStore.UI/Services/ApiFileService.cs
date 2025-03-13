@@ -1,13 +1,16 @@
 ﻿using CloudStore.BL.Models;
 using CloudStore.UI.Models;
+using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace CloudStore.UI.Services;
@@ -17,6 +20,7 @@ public class ApiFileService
     private readonly HttpClient _httpClient;
     private readonly WebClient _webClient;
     private readonly User _user;
+    private readonly HubConnection _signalRClient;
 
     public ApiFileService(User user)
     {
@@ -28,13 +32,10 @@ public class ApiFileService
         
         _user = user;
         _httpClient = new HttpClient(clientHandler);
-        _webClient = new WebClient()
-        {
-
-        };
-
-        
-        
+        _webClient = new WebClient();
+        _signalRClient = new HubConnectionBuilder()
+            .WithUrl("https://localhost:7157/cloud-store-api/large-file-hub")
+            .Build();
     }
 
     public async Task<List<CloudStoreUiListItem>?> GetStartingScreenItemsAsync()
@@ -129,6 +130,38 @@ public class ApiFileService
             HttpStatusCode.OK => new FileForList(await resposne.Content.ReadFromJsonAsync<FileModel?>()),
             _ => null,
         };
+    }
+    public async Task<CloudStoreUiListItem?> UploadLargeFile(string filePath, string? directory)
+    {
+        var fileName = filePath.Split('\\')[^1];
+
+        if (directory != null && !string.IsNullOrEmpty(directory))
+            fileName = directory + "\\" + fileName;
+
+        try
+        {
+            await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            byte[] buffer = new byte[fs.Length];
+
+            await fs.ReadExactlyAsync(buffer);
+
+            await _signalRClient.StartAsync();
+
+            var res = await _signalRClient.InvokeAsync<FileModel>("SendLargeFile", _user.ApiKey, fileName, buffer);
+            if (res is not null)
+                return new FileForList(res);
+        }
+        catch (UnauthorizedAccessException unEx)
+        {
+            throw new UnauthorizedAccessException("Not authorized");
+        }
+        catch (SocketException ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return null;
+        }   
+        return null;
+
     }
 
     public async Task<bool> DownloadFileAsync(FileModel file, string path)

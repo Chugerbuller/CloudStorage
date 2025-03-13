@@ -47,7 +47,7 @@ public class Program
         app.UseHttpsRedirection();
         app.UseAuthorization();
         app.MapControllers();
-        app.MapHub<LargeFileHub>("/large-file-hub");
+        app.MapHub<LargeFileHub>("cloud-store-api/large-file-hub");
 
         app.Run();
     }
