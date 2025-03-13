@@ -104,7 +104,10 @@ public class ApiFileService
         var fileName = filePath.Split(@"\")[^1];
         var extension = fileName.Split(".")[^1];
 
-        var fileStreamContent = new StreamContent(File.OpenRead(filePath));
+        await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+        
+
+        var fileStreamContent = new StreamContent(fs);
         fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue($"application/{extension}");
         multipartFormContent.Add(fileStreamContent, name: "uploadedFile", fileName: fileName);
         var resposne = await _httpClient.PostAsync(url, multipartFormContent);
@@ -126,7 +129,7 @@ public class ApiFileService
         {
             case HttpStatusCode.OK:
 
-                _webClient.DownloadFile(
+                _webClient.DownloadFileAsync(
                                     new Uri("https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/download/" + file.Id),
                                     Path.Combine(path, file.Name));
                 return true;
@@ -185,15 +188,14 @@ public class ApiFileService
 
     public async Task<DirectoryForList?> ChangeDirectoryNameAsync(string oldDirectory, string newDirectoryName)
     {
-        
         HttpContent content = JsonContent.Create(oldDirectory);
-        
+
         var response = await _httpClient.PutAsync(
             "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + $"/rename-directory/{newDirectoryName}", content);
-        
+
         if (response.IsSuccessStatusCode)
             return new DirectoryForList(await response.Content.ReadAsStringAsync());
-        
+
         return null;
     }
 
