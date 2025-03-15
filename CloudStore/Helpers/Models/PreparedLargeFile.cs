@@ -9,14 +9,14 @@ public class PreparedLargeFile
     {
         File = new FileModel
         {
-            User = user,
+            UserId = user.Id,
             Path = filePath,
             Name = fileName,
             Extension = extension
         };
         Packages = new();
         FinishedFillingPackages = false;
-        System.IO.File.Create(filePath);
+        
     }
 
     public FileModel File { get; init; }

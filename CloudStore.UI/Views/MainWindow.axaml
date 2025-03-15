@@ -28,9 +28,9 @@
             <Grid ColumnDefinitions="*,25*">
                 <Button
                     x:Name="ButtonToPrevDir"
-                    Margin="5"
-                    MinWidth="35"
                     Grid.Column="0"
+                    MinWidth="35"
+                    Margin="5"
                     Padding="0"
                     Command="{Binding ToPrevDirectoryCommand}"
                     Content="..." />
@@ -194,33 +194,49 @@
                 Orientation="Vertical">
                 <TextBox Margin="5" Text="{Binding NewDirectory}" />
                 <StackPanel Orientation="Horizontal">
-                <Button
-                    Margin="5"
-                    Command="{Binding MakeDirectoryCommand}"
-                    Content="Ок" />
-                <Button
-                    Margin="5"
-                    Command="{Binding CancelNewFolderCommand}"
-                    Content="Отмена"></Button>
+                    <Button
+                        Margin="5"
+                        Command="{Binding MakeDirectoryCommand}"
+                        Content="Ок" />
+                    <Button
+                        Margin="5"
+                        Command="{Binding CancelNewFolderCommand}"
+                        Content="Отмена" />
                 </StackPanel>
 
             </StackPanel>
-            <StackPanel IsVisible="{Binding EnableEditFile}" Orientation="Vertical"  HorizontalAlignment="Center">
-                <TextBox
-                    Margin="5"
-                    
-                    Text="{Binding newFileName}" />
+            <StackPanel
+                HorizontalAlignment="Center"
+                IsVisible="{Binding EnableEditFile}"
+                Orientation="Vertical">
+                <TextBox Margin="5" Text="{Binding newFileName}" />
                 <StackPanel Orientation="Horizontal">
-                <Button
-                    Margin="5"
-                    Command="{Binding EditFileCommand}"
-                    Content="Ок"
-                    />
-                <Button
-                    Margin="5"
-                    Command="{Binding CancelEditCommand}"
-                    Content="Отмена"></Button>
+                    <Button
+                        Margin="5"
+                        Command="{Binding EditFileCommand}"
+                        Content="Ок" />
+                    <Button
+                        Margin="5"
+                        Command="{Binding CancelEditCommand}"
+                        Content="Отмена" />
                 </StackPanel>
+            </StackPanel>
+            <StackPanel IsVisible="{Binding LoadVisibility}" Orientation="Vertical">
+                <StackPanel
+                    Margin="10"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal">
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Text="{Binding LoadFileText}" />
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Text="{Binding fileSizeGradation}" />
+                </StackPanel>
+                <ProgressBar Maximum="{Binding ProgressBarMax}" Value="{Binding ProgressBarValue}" />
             </StackPanel>
         </StackPanel>
         <StackPanel

@@ -22,10 +22,13 @@ namespace CloudStore.UI.ViewModels
     public class MainWindowViewModel : ViewModelBase, ICloseable
     {
         #region ReadonlyProps
+
         private readonly ApiFileService _apiFileService;
-        #endregion
+
+        #endregion ReadonlyProps
 
         #region ReactiveCommands
+
         public ReactiveCommand<Unit, Unit> ToPrevDirectoryCommand { get; }
         public ReactiveCommand<Unit, Unit> CancelNewFolderCommand { get; }
         public ReactiveCommand<Unit, Unit> CancelEditCommand { get; }
@@ -39,10 +42,24 @@ namespace CloudStore.UI.ViewModels
         public ReactiveCommand<Unit, Unit> MakeDirectoryShowCommand { get; }
         public ReactiveCommand<Unit, Unit> GoToDirectoryCommand { get; }
         public ReactiveCommand<Unit, Unit> LogOutCommand { get; }
-        #endregion
+
+        #endregion ReactiveCommands
 
         #region ReactiveProps
+
         public ObservableCollection<CloudStoreUiListItem?> FilesAndDirectorys { get; set; } = [];
+
+        [Reactive]
+        public bool LoadVisibility { get; set; } = false;
+
+        [Reactive] public string LoadFileText { get; set; } = "";
+        [Reactive] public string fileSizeGradation { get; set; } = "";
+
+        [Reactive]
+        public int ProgressBarMax { get; set; } = 0;
+
+        [Reactive]
+        public int ProgressBarValue { get; set; } = 0;
 
         [Reactive]
         public string UserPath { get; set; } = "";
@@ -61,22 +78,30 @@ namespace CloudStore.UI.ViewModels
 
         [Reactive]
         public string newFileName { get; set; } = "";
-        #endregion
+
+        #endregion ReactiveProps
 
         #region Events
+
         public event EventHandler? Closed;
-        #endregion
+
+        #endregion Events
 
         #region Props
+
         public User? User { get; set; }
-        #endregion
+        public IProgress<int> Progress { get; set; }
+        private int bytesLoaded = 0;
+
+        #endregion Props
 
         #region Ctor
+
         public MainWindowViewModel(User? user)
         {
             User = user;
             CloseWindowCommand = ReactiveCommand.Create(() => Closed(this, new EventArgs()));
-    
+
             CancelEditCommand = ReactiveCommand.Create(CancelEdit);
             CancelNewFolderCommand = ReactiveCommand.Create(CancelNewFolder);
             AvailableEditFileCommand = ReactiveCommand.Create(MakeVisibleEdit);
@@ -90,9 +115,16 @@ namespace CloudStore.UI.ViewModels
             MakeDirectoryCommand = ReactiveCommand.CreateFromTask(MakeDirectory);
             EditFileCommand = ReactiveCommand.CreateFromTask(EditDirOrFile);
             _apiFileService = new(User);
+            Progress = new Progress<int>(i =>
+            {
+                bytesLoaded++;
+                LoadFileText = $"{bytesLoaded}/{ProgressBarMax}";
+                ProgressBarValue++;
+            });
             _initList();
         }
-        #endregion
+
+        #endregion Ctor
 
         #region Methods
 
@@ -183,9 +215,34 @@ namespace CloudStore.UI.ViewModels
                 if (directory is null)
                     return;
 
-                //var res = await _apiFileService.UploadFileAsync(directory[0], UserPath);
-                var res = await _apiFileService.UploadLargeFile(directory[0], UserPath);
-                
+                var filePath = directory[0];
+
+                var fileInfo = new FileInfo(filePath);
+
+                CloudStoreUiListItem? res;
+
+                var fileSize = fileInfo.Length;
+                LoadVisibility = true;
+                if (fileSize / 1024 > 0)
+                {
+                    ProgressBarMax = Convert.ToInt32(fileSize / (10240 * 10));
+                    fileSizeGradation = "100Kb";
+                }
+                else
+                {
+                    ProgressBarMax = Convert.ToInt32(fileSize);
+                    fileSizeGradation = "b";
+                }
+
+                if (fileSize >= (1024 * 1024 * 100))
+                    res = await _apiFileService.UploadLargeFile(filePath, UserPath, Progress);
+                else
+                    res = await _apiFileService.UploadFileAsync(filePath, UserPath);
+
+                bytesLoaded = 0;
+                LoadVisibility = false;
+                ProgressBarValue = 0;
+
                 if (res is null)
                     return;
                 FilesAndDirectorys.Add(res);
@@ -228,11 +285,13 @@ namespace CloudStore.UI.ViewModels
             MakeDirectoryVisibility = !MakeDirectoryVisibility;
             NewDirectory = "";
         }
+
         public void CancelEdit()
         {
             EnableEditFile = !EnableEditFile;
             newFileName = "";
         }
+
         public async Task ToPrevDirectory()
         {
             if (UserPath == "")
@@ -306,7 +365,6 @@ namespace CloudStore.UI.ViewModels
 
         public void LogOut()
         {
-
             var appCfg = JsonSerializer.Deserialize<ApplicationConfig>(File.ReadAllText("Configs\\ApplicationConfig.json"));
             appCfg.RememberUser = false;
             var appJsonByte = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(appCfg));
@@ -315,6 +373,7 @@ namespace CloudStore.UI.ViewModels
 
             Closed(this, new EventArgs());
         }
-        #endregion
+
+        #endregion Methods
     }
 }

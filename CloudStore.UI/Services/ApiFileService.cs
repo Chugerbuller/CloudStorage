@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CloudStore.UI.Services;
@@ -36,6 +37,8 @@ public class ApiFileService
         _signalRClient = new HubConnectionBuilder()
             .WithUrl("https://localhost:7157/cloud-store-api/large-file-hub")
             .Build();
+        _signalRClient.HandshakeTimeout = TimeSpan.FromMinutes(30);
+
     }
 
     public async Task<List<CloudStoreUiListItem>?> GetStartingScreenItemsAsync()
@@ -106,8 +109,8 @@ public class ApiFileService
     public async Task<CloudStoreUiListItem?> UploadFileAsync(string filePath, string directory = "")
     {
         using var multipartFormContent = new MultipartFormDataContent();
-        var url = "localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey;
-        if (directory is not null)
+        var url = "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey;
+        if (directory is not null && !string.IsNullOrEmpty(directory))
             url += $@"/upload-file/{string.Join("|", directory.Split("\\"))}";
         else
             url += "/upload-file";
@@ -131,7 +134,7 @@ public class ApiFileService
         };
     }
 
-    public async Task<CloudStoreUiListItem?> UploadLargeFile(string filePath, string? directory)
+    public async Task<CloudStoreUiListItem?> UploadLargeFile2(string filePath, string? directory)
     {
         var fileName = filePath.Split('\\')[^1];
 
@@ -163,33 +166,77 @@ public class ApiFileService
         return null;
     }
 
-    public async Task<FileModel?> UploadLargeFile(stirng filePath)
+    public async Task<FileForList?> UploadLargeFile(string filePath, string? directory, IProgress<int> progress)
     {
-        await using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+        
+        if (!await PrepareLargeFile(filePath, directory))
+            return null;
+        await UploadingLargeFile(filePath, directory,progress);
+        var file = await FinishFileUploading();
+
+        if (file == null)
+            return null;
+
+        return new(file);
+    }
+
+    public async Task<bool> PrepareLargeFile(string filePath, string? directory)
+    {
+        await _signalRClient.StartAsync();
+        var fileName = filePath.Split('\\')[^1];
+
+        if (directory != null && !string.IsNullOrEmpty(directory))
+            fileName = directory + "\\" + fileName;
+        var temp = await _signalRClient.InvokeAsync<bool>("PrepareLargeFile", _user.ApiKey, fileName);
+        if (temp)
         {
-            _signalRClient.StartAsync();
-            await _signalRClient.InvokeAsync("PrepareLargeFile", _user.ApiKey, filePath);
-
-            var size = fs.Length / 10240;
-            var lastSize = fs.Length % 10240;
-            for (var i = 0; i < size - 1; i++)
-            {
-                var package = new byte[10240];
-                fs.Read(package, 0, package.Length);
-                _signalRClient.InvokeAsync("UploadLargeFile", _user.ApiKey, package, false);
-            }
-            var lastPackage = new byte[lastSize];
-            fs.Read(lastPackage, 0, lastPackage.Length);
-            await _signalRClient.InvokeAsync("UploadLargeFile", _user.ApiKey, lastPackage, true);
-
-            return await _signalRClient.InvokeAsync<FileModel?>("FinishFileUploading", _user.ApiKey);
+            await _signalRClient.StopAsync();
+            return true;
         }
+        else
+            return false;
+    }
+
+    public async Task UploadingLargeFile(string filePath, string? directory, IProgress<int> progress)
+    {
+        await _signalRClient.StartAsync();
+        
+        await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+        var size = fs.Length / (10240 * 10);
+        var lastSize = fs.Length % (10240 * 10);
+        for (var i = 0; i < size - 1; i++)
+        {
+            var package = new byte[10240 * 10];
+            fs.Read(package, 0, package.Length);
+
+            await _signalRClient.InvokeAsync("UploadLargeFile", _user.ApiKey, package, false);
+            ;
+            progress.Report(1);
+        }
+        var lastPackage = new byte[lastSize];
+        fs.Read(lastPackage, 0, lastPackage.Length);
+        fs.Dispose();
+        await _signalRClient.InvokeAsync("UploadLargeFile", _user.ApiKey, lastPackage, true);
+
+        await _signalRClient.StopAsync();
+    }
+
+    public async Task<FileModel?> FinishFileUploading()
+    {
+        Thread.Sleep(100);
+        await _signalRClient.StartAsync();
+
+        var res = await _signalRClient.InvokeAsync<FileModel?>("FinishFileUploading", _user.ApiKey);
+
+        await _signalRClient.StopAsync();
+
+        return res;
     }
 
     public async Task<bool> DownloadFileAsync(FileModel file, string path)
     {
         var response = await _httpClient
-            .GetAsync("localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/download/" + file.Id);
+            .GetAsync("https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/download/" + file.Id);
         switch (response.StatusCode)
         {
             case HttpStatusCode.OK:
