@@ -157,5 +157,9 @@ public class LargeFileHub : Hub
 
         return file;
     }
-    //TODO make downloadin large files
+
+    public async Task PrepareLargeFileForDownload(string apiKey, int fileId)
+    {
+        
+    }
 }
