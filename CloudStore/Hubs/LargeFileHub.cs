@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Memory;
 using System.IO;
+using System.Reflection.Metadata;
 
 namespace CloudStore.Hubs;
 
@@ -154,12 +155,46 @@ public class LargeFileHub : Hub
         };
 
         await _dbFileHelper.AddFileAsync(file);
-
+        _cache.Remove(apiKey);
         return file;
     }
 
-    public async Task PrepareLargeFileForDownload(string apiKey, int fileId)
+    public async Task<string> PrepareLargeFileForDownload(string apiKey, int fileId)
     {
+        if (!_apiKeyValidation.IsValidApiKey(apiKey))
+            throw new UnauthorizedAccessException();
+
+        var user = _dbUserHelper.GetUserByApiKey(apiKey);
+        var file = await _dbFileHelper.GetFileByIdAsync(fileId, user);
+        
+        var connectionId = Context.ConnectionId;
+        var downloadId = Guid.NewGuid().ToString();
+        _cache.Set(downloadId, new PreparedFileForDownload(file, connectionId));
+        
+        return downloadId;
+    }
+
+    public async Task DownloadLargeFile(string downloadId)
+    {
+        const int MB = 1024*1024;
+        var file = _cache.Get<PreparedFileForDownload>(downloadId);
+
+        var fileInfo = new FileInfo(file.File.Path);
+        var quantityOfPackages = fileInfo.Length / (1024 * 1024);
+        var sizeOfLastPackage = fileInfo.Length % (1024 * 1024);
+
+        await using var fs = new FileStream(file.File.Path, FileMode.Open, FileAccess.Read);
+        for (int i = 0; i < quantityOfPackages - 1; i++)
+        {
+            var package = new byte[MB];
+            await fs.ReadExactlyAsync(package);
+            await Clients.Client(file.ConnectionId).SendAsync("DownloadLargeFile", package, false);
+        }
+        var lastPackage = new byte[sizeOfLastPackage];
+        
+        await fs.ReadExactlyAsync(lastPackage);
+        await Clients.Client(file.ConnectionId).SendAsync("DownloadLargeFile", lastPackage, true );
+        
         
     }
 }
