@@ -187,8 +187,12 @@ namespace CloudStore.UI.ViewModels
                     var directory = await dialog.ShowAsync(new Window());
                     if (directory is null)
                         return;
+                    var fileSize = await _apiFileService.CheckFileSizeAsync(file.File);
 
-                    await _apiFileService.DownloadFileAsync(file.File, directory);
+                    if (fileSize >= 1024 * 1024 * 100)
+                        await _apiFileService.DownloadLargeFileAsync(file.File.Id, directory);
+                    else
+                        await _apiFileService.DownloadFileAsync(file.File, directory);
                     return;
                 }
             }

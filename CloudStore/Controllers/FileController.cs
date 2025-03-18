@@ -164,6 +164,20 @@ public class FileController : ControllerBase
         return Ok(oldFile);
     }
 
+    [HttpGet("api-key:{apiKey}/file-size/{id}")]
+    public async Task<IActionResult> GetFileSizeAsync(string apiKey, int id)
+    {
+        if (string.IsNullOrWhiteSpace(apiKey))
+            return BadRequest();
+
+        bool isValid = _apiKeyValidation.IsValidApiKey(apiKey);
+        if (!isValid)
+            return Unauthorized();
+        var user = _dbUserHelper.GetUserByApiKey(apiKey);
+        var file = await _dbHelper.GetFileByIdAsync(id, user);
+        
+        return Ok(new FileInfo(file.Path).Length);
+    }
     [HttpDelete("api-key:{apiKey}/{id}")]
     public async Task<IActionResult> DeleteAsync(string apiKey, int id)
     {

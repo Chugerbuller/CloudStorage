@@ -12,7 +12,7 @@ public class PreparedLargeFile
             UserId = user.Id,
             Path = filePath,
             Name = fileName,
-            Extension = extension
+            Extension = extension,
         };
         Packages = new();
         FinishedFillingPackages = false;

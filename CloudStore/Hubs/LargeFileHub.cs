@@ -180,20 +180,20 @@ public class LargeFileHub : Hub
         var file = _cache.Get<PreparedFileForDownload>(downloadId);
 
         var fileInfo = new FileInfo(file.File.Path);
-        var quantityOfPackages = fileInfo.Length / (1024 * 1024);
-        var sizeOfLastPackage = fileInfo.Length % (1024 * 1024);
+        var quantityOfPackages = fileInfo.Length / (MB);
+        var sizeOfLastPackage = fileInfo.Length % (MB);
 
         await using var fs = new FileStream(file.File.Path, FileMode.Open, FileAccess.Read);
         for (int i = 0; i < quantityOfPackages - 1; i++)
         {
             var package = new byte[MB];
             await fs.ReadExactlyAsync(package);
-            await Clients.Client(file.ConnectionId).SendAsync("DownloadLargeFile", package, false);
+            await Clients.Client(file.ConnectionId).SendAsync("DownloadLargeFileCLient", package, false);
         }
         var lastPackage = new byte[sizeOfLastPackage];
         
         await fs.ReadExactlyAsync(lastPackage);
-        await Clients.Client(file.ConnectionId).SendAsync("DownloadLargeFile", lastPackage, true );
+        await Clients.Client(file.ConnectionId).SendAsync("DownloadLargeFileCLient", lastPackage, true );
         
         
     }

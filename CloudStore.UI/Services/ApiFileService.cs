@@ -13,6 +13,7 @@ using System.Net.Http.Json;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace CloudStore.UI.Services;
 
@@ -22,6 +23,8 @@ public class ApiFileService
     private readonly WebClient _webClient;
     private readonly User _user;
     private readonly HubConnection _signalRClient;
+    private string _downloadPath;
+    private FileStream _fileStreamForDownload;
 
     public ApiFileService(User user)
     {
@@ -38,6 +41,19 @@ public class ApiFileService
             .WithUrl("https://localhost:7157/cloud-store-api/large-file-hub")
             .Build();
         _signalRClient.HandshakeTimeout = TimeSpan.FromMinutes(30);
+        _signalRClient.On<byte[], bool>("DownloadLargeFileCLient", async (package, isFinished) =>
+        {
+            if (!isFinished)
+            {
+                if (_fileStreamForDownload != null) 
+                    await _fileStreamForDownload.WriteAsync(package);
+            }
+            else
+            {
+                await _fileStreamForDownload.WriteAsync(package);
+                _fileStreamForDownload?.Dispose();
+            }
+        });
 
     }
 
@@ -202,11 +218,11 @@ public class ApiFileService
         await _signalRClient.StartAsync();
         
         await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-        var size = fs.Length / (10240 * 10);
-        var lastSize = fs.Length % (10240 * 10);
+        var size = fs.Length / (1024 * 1024);
+        var lastSize = fs.Length % (1024 * 1024);
         for (var i = 0; i < size - 1; i++)
         {
-            var package = new byte[10240 * 10];
+            var package = new byte[1024*1024];
             fs.Read(package, 0, package.Length);
 
             await _signalRClient.InvokeAsync("UploadLargeFile", _user.ApiKey, package, false);
@@ -311,6 +327,12 @@ public class ApiFileService
         return null;
     }
 
+    public async Task<long> CheckFileSizeAsync(FileModel file)
+    {
+        return
+            await _httpClient.GetFromJsonAsync<long>(
+                $"https://localhost:7157/cloud-store-api/File/api-key:{_user.ApiKey}/file-size/{file.Id}");
+    }
     public async Task<bool> DeleteDirectoryAsync(string directory)
     {
         HttpContent content = JsonContent.Create(directory);
@@ -320,4 +342,21 @@ public class ApiFileService
             return true;
         return false;
     }
+
+    public async Task DownloadLargeFileAsync(int fileId, string downloadPath)
+    {
+        _downloadPath = downloadPath;
+        _fileStreamForDownload = File.Create("downloadPath");
+        await _signalRClient.StartAsync();
+        
+        var downloadId = _signalRClient.InvokeAsync<string>("PrepareLargeFileForDownload", _user.ApiKey, fileId);
+        
+        await _signalRClient.StopAsync();
+        await _signalRClient.StartAsync();
+        
+        await _signalRClient.InvokeAsync("DownloadLargeFile", downloadId);
+        
+        await _signalRClient.StopAsync();
+    }
+    
 }
