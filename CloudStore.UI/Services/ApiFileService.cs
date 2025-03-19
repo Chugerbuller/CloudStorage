@@ -2,6 +2,7 @@
 using CloudStore.UI.Models;
 using Microsoft.AspNetCore.SignalR.Client;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -24,7 +25,7 @@ public class ApiFileService
     private readonly User _user;
     private readonly HubConnection _signalRClient;
     private string _downloadPath;
-    private FileStream _fileStreamForDownload;
+    private Dictionary<string,Queue<byte[]>> _packageMap = new();
 
     public ApiFileService(User user)
     {
@@ -41,22 +42,34 @@ public class ApiFileService
             .WithUrl("https://localhost:7157/cloud-store-api/large-file-hub")
             .Build();
         _signalRClient.HandshakeTimeout = TimeSpan.FromMinutes(30);
-        _signalRClient.On<byte[], bool>("DownloadLargeFileCLient", async (package, isFinished) =>
+        _signalRClient.On<byte[], string, bool>("DownloadLargeFileCLient", async (package,downloadId ,isFinished) =>
         {
             if (!isFinished)
             {
-                if (_fileStreamForDownload != null) 
-                    await _fileStreamForDownload.WriteAsync(package);
+                _packageMap[downloadId].Enqueue(package);
             }
             else
             {
-                await _fileStreamForDownload.WriteAsync(package);
-                _fileStreamForDownload?.Dispose();
+                _packageMap[downloadId].Enqueue(package);
+                await WriteFile(downloadId);
             }
+            
         });
 
     }
 
+    private async Task WriteFile(string downloadId)
+    {
+        var queue = _packageMap[downloadId];
+        
+        await using var fs = new FileStream(_downloadPath, FileMode.Append, FileAccess.Write);
+
+        while (queue.Count > 0)
+        {
+            await fs.WriteAsync(queue.Dequeue());
+        }
+        
+    }
     public async Task<List<CloudStoreUiListItem>?> GetStartingScreenItemsAsync()
     {
         var res = new List<CloudStoreUiListItem>();
@@ -346,17 +359,21 @@ public class ApiFileService
     public async Task DownloadLargeFileAsync(int fileId, string downloadPath)
     {
         _downloadPath = downloadPath;
-        _fileStreamForDownload = File.Create("downloadPath");
+        var fs = File.Create("downloadPath");
         await _signalRClient.StartAsync();
         
-        var downloadId = _signalRClient.InvokeAsync<string>("PrepareLargeFileForDownload", _user.ApiKey, fileId);
+        var downloadId = await _signalRClient.InvokeAsync<string>("PrepareLargeFileForDownload", _user.ApiKey, fileId);
         
         await _signalRClient.StopAsync();
+        
+        _packageMap.Add(downloadId, new());
+        
         await _signalRClient.StartAsync();
         
         await _signalRClient.InvokeAsync("DownloadLargeFile", downloadId);
         
         await _signalRClient.StopAsync();
+        fs.Dispose();
     }
     
 }
