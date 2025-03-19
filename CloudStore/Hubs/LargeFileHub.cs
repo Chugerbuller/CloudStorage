@@ -189,6 +189,7 @@ public class LargeFileHub : Hub
             var package = new byte[MB];
             await fs.ReadExactlyAsync(package);
             await Clients.Client(file.ConnectionId).SendAsync("DownloadLargeFileCLient", package, downloadId,false);
+            Console.WriteLine("send package - " + i.ToString());
         }
         var lastPackage = new byte[sizeOfLastPackage];
         

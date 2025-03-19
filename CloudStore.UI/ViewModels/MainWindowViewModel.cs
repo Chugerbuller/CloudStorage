@@ -188,12 +188,16 @@ namespace CloudStore.UI.ViewModels
                     if (directory is null)
                         return;
                     var fileSize = await _apiFileService.CheckFileSizeAsync(file.File);
-
+                    ProgressBarMax = Convert.ToInt32(fileSize / 1024 / 1024);
+                    bytesLoaded = 0;
+                    LoadVisibility = true;
                     if (fileSize >= 1024 * 1024 * 100)
-                        await _apiFileService.DownloadLargeFileAsync(file.File.Id, directory);
+                        await _apiFileService.DownloadLargeFileAsync(file.File, directory, Progress);
                     else
                         await _apiFileService.DownloadFileAsync(file.File, directory);
+                    
                     return;
+                    
                 }
             }
             catch (IOException ex)
