@@ -20,6 +20,8 @@ namespace CloudStore.UI.Services;
 
 public class ApiFileService
 {
+    private const int MB = 1024 * 1024;
+    private const int KB = 1024;
     private readonly HttpClient _httpClient;
     private readonly WebClient _webClient;
     private readonly User _user;
@@ -71,8 +73,10 @@ public class ApiFileService
         await using var fs = new FileStream(_downloadPath, FileMode.Append, FileAccess.Write);
 
         while (queue.Count > 0)
+        {
             await fs.WriteAsync(queue.Dequeue());
-
+            _progress.Report(1);
+        }
         await _signalRClient.StopAsync();
     }
 
@@ -176,38 +180,7 @@ public class ApiFileService
         };
     }
 
-    public async Task<CloudStoreUiListItem?> UploadLargeFile2(string filePath, string? directory)
-    {
-        var fileName = filePath.Split('\\')[^1];
-
-        if (directory != null && !string.IsNullOrEmpty(directory))
-            fileName = directory + "\\" + fileName;
-
-        try
-        {
-            await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            byte[] buffer = new byte[fs.Length];
-
-            await fs.ReadExactlyAsync(buffer);
-
-            await _signalRClient.StartAsync();
-
-            var res = await _signalRClient.InvokeAsync<FileModel>("SendLargeFile", _user.ApiKey, fileName, buffer);
-            if (res is not null)
-                return new FileForList(res);
-        }
-        catch (UnauthorizedAccessException unEx)
-        {
-            throw new UnauthorizedAccessException("Not authorized");
-        }
-        catch (SocketException ex)
-        {
-            Debug.WriteLine(ex.Message);
-            return null;
-        }
-
-        return null;
-    }
+    
 
     public async Task<FileForList?> UploadLargeFile(string filePath, string? directory, IProgress<int> progress)
     {
@@ -244,24 +217,25 @@ public class ApiFileService
         await _signalRClient.StartAsync();
 
         await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-        var size = fs.Length / (1024 * 1024);
-        var lastSize = fs.Length % (1024 * 1024);
-        for (var i = 0; i < size - 1; i++)
+        var quantityOfPackages = fs.Length / MB;
+        var lastSize = fs.Length % MB;
+        for (var i = 0; i < quantityOfPackages; i++)
         {
-            var package = new byte[1024 * 1024];
-            fs.Read(package, 0, package.Length);
+            var package = new byte[MB];
+            await fs.ReadExactlyAsync(package);
 
             await _signalRClient.InvokeAsync("UploadLargeFile", _user.ApiKey, package, false);
-            ;
+            
             progress.Report(1);
         }
 
         var lastPackage = new byte[lastSize];
-        fs.Read(lastPackage, 0, lastPackage.Length);
-        fs.Dispose();
+        await fs.ReadExactlyAsync(lastPackage);
+       
         await _signalRClient.InvokeAsync("UploadLargeFile", _user.ApiKey, lastPackage, true);
 
         await _signalRClient.StopAsync();
+        fs.Dispose();
     }
 
     public async Task<FileModel?> FinishFileUploading()

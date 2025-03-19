@@ -15,6 +15,7 @@ namespace CloudStore.Hubs;
 [DisableRequestSizeLimit]
 public class LargeFileHub : Hub
 {
+    const int MB = 1024 * 1024;
     private readonly IWebHostEnvironment _webHostEnvironment;
     private readonly CSFilesDbHelper _dbFileHelper;
     private readonly CSUsersDbHelper _dbUserHelper;
@@ -105,6 +106,7 @@ public class LargeFileHub : Hub
         }
         else if (end)
         {
+            queue.Packages.Enqueue(package);
             var path = queue.File.Path;
 
             if (!File.Exists(path))
@@ -176,20 +178,19 @@ public class LargeFileHub : Hub
 
     public async Task DownloadLargeFile(string downloadId)
     {
-        const int MB = 1024*1024;
+        
         var file = _cache.Get<PreparedFileForDownload>(downloadId);
 
         var fileInfo = new FileInfo(file.File.Path);
-        var quantityOfPackages = fileInfo.Length / (MB);
-        var sizeOfLastPackage = fileInfo.Length % (MB);
+        var quantityOfPackages = fileInfo.Length / MB;
+        var sizeOfLastPackage = fileInfo.Length % MB;
 
         await using var fs = new FileStream(file.File.Path, FileMode.Open, FileAccess.Read);
-        for (int i = 0; i < quantityOfPackages - 1; i++)
+        for (int i = 0; i < quantityOfPackages; i++)
         {
             var package = new byte[MB];
             await fs.ReadExactlyAsync(package);
             await Clients.Client(file.ConnectionId).SendAsync("DownloadLargeFileCLient", package, downloadId,false);
-            Console.WriteLine("send package - " + i.ToString());
         }
         var lastPackage = new byte[sizeOfLastPackage];
         
