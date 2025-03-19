@@ -24,11 +24,12 @@ public class Program
         builder.Services.AddSignalR(hubOptions =>
         {
             hubOptions.EnableDetailedErrors = true;
-            hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(60);
-            hubOptions.ClientTimeoutInterval = TimeSpan.FromMinutes(60);
+            hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(1);
+            hubOptions.ClientTimeoutInterval = TimeSpan.FromHours(1);
+            hubOptions.HandshakeTimeout = TimeSpan.FromMinutes(30);
             hubOptions.MaximumReceiveMessageSize = int.MaxValue;
-        })
-        ;
+        });
+        builder.Services.AddMemoryCache();
 
         var app = builder.Build();
 
