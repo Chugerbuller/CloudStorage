@@ -53,10 +53,12 @@ public class ApiFileService
             if (!isFinished)
             {
                 _packageMap[downloadId].Enqueue(package);
+                _progress.Report(1);
             }
             else
             {
                 _packageMap[downloadId].Enqueue(package);
+                _progress.Report(1);
                 await WriteFile(downloadId);
             }
         });
@@ -69,10 +71,7 @@ public class ApiFileService
         await using var fs = new FileStream(_downloadPath, FileMode.Append, FileAccess.Write);
 
         while (queue.Count > 0)
-        {
             await fs.WriteAsync(queue.Dequeue());
-            _progress.Report(1);
-        }
 
         await _signalRClient.StopAsync();
     }
@@ -380,8 +379,8 @@ public class ApiFileService
     {
         _progress = progress;
         var fileId = file.Id;
-        _downloadPath = downloadPath;
-        File.Create($"{downloadPath}\\{file.Name}");
+        _downloadPath = $"{downloadPath}\\{file.Name}";
+        File.Create(_downloadPath);
         await _signalRClient.StartAsync();
 
         var downloadId = await _signalRClient.InvokeAsync<string>("PrepareLargeFileForDownload", _user.ApiKey, fileId);
