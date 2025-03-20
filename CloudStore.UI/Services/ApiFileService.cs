@@ -45,11 +45,22 @@ public class ApiFileService
         _httpClient = new HttpClient(clientHandler);
         _webClient = new WebClient();
         _signalRClient = new HubConnectionBuilder()
-            .WithUrl("https://localhost:7157/cloud-store-api/large-file-hub")
+            .WithUrl("https://26.187.175.30:7156/cloud-store-api/large-file-hub", (opts) =>
+        {
+            opts.HttpMessageHandlerFactory = (message) =>
+            {
+                if (message is HttpClientHandler clientHandler)
+                    // always verify the SSL certificate
+                    clientHandler.ServerCertificateCustomValidationCallback +=
+                        (sender, certificate, chain, sslPolicyErrors) => { return true; };
+                return message;
+            };
+        })
             .WithAutomaticReconnect()
             .Build();
         _signalRClient.HandshakeTimeout = TimeSpan.FromMinutes(30);
         _signalRClient.ServerTimeout = TimeSpan.FromMinutes(30);
+        
         _signalRClient.On<byte[], string, bool>("DownloadLargeFileCLient", async (package, downloadId, isFinished) =>
         {
             if (!isFinished)
@@ -87,7 +98,7 @@ public class ApiFileService
         List<DirectoryForList>? directorys;
         //Fix me "api-key" scheme is not supported
         var rawFiles = await _httpClient.GetFromJsonAsync<IEnumerable<FileModel>>(
-            "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/all-files-from-directory");
+            "https://26.187.175.30:7156/cloud-store-api/File/api-key:" + _user.ApiKey + "/all-files-from-directory");
 
         if (rawFiles == null)
             files = null;
@@ -96,7 +107,7 @@ public class ApiFileService
 
         var rawDirectorys =
             await _httpClient.GetFromJsonAsync<IEnumerable<string>>(
-                $"https://localhost:7157/cloud-store-api/File/api-key:{_user.ApiKey}/scan-directory");
+                $"https://26.187.175.30:7156/cloud-store-api/File/api-key:{_user.ApiKey}/scan-directory");
 
         if (rawDirectorys == null)
             directorys = null;
@@ -118,7 +129,7 @@ public class ApiFileService
         try
         {
             var rawFiles = await _httpClient.GetFromJsonAsync<IEnumerable<FileModel>>(
-                "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey +
+                "https://26.187.175.30:7156/cloud-store-api/File/api-key:" + _user.ApiKey +
                 $"/all-files-from-directory/{directory}");
 
             if (rawFiles == null)
@@ -134,7 +145,7 @@ public class ApiFileService
         try
         {
             var rawDirectorys = await _httpClient.GetFromJsonAsync<IEnumerable<string>>(
-                "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + $"/scan-directory/{directory}");
+                "https://26.187.175.30:7156/cloud-store-api/File/api-key:" + _user.ApiKey + $"/scan-directory/{directory}");
 
             if (rawDirectorys == null)
                 directorys = [];
@@ -155,7 +166,7 @@ public class ApiFileService
     public async Task<CloudStoreUiListItem?> UploadFileAsync(string filePath, string directory = "")
     {
         using var multipartFormContent = new MultipartFormDataContent();
-        var url = "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey;
+        var url = "https://26.187.175.30:7156/cloud-store-api/File/api-key:" + _user.ApiKey;
         if (directory is not null && !string.IsNullOrEmpty(directory))
             url += $@"/upload-file/{string.Join("|", directory.Split("\\"))}";
         else
@@ -253,13 +264,13 @@ public class ApiFileService
     public async Task<bool> DownloadFileAsync(FileModel file, string path)
     {
         var response = await _httpClient
-            .GetAsync("https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/download/" + file.Id);
+            .GetAsync("https://26.187.175.30:7156/cloud-store-api/File/api-key:" + _user.ApiKey + "/download/" + file.Id);
         switch (response.StatusCode)
         {
             case HttpStatusCode.OK:
 
                 _webClient.DownloadFileAsync(
-                    new Uri("https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/download/" +
+                    new Uri("https://26.187.175.30:7156/cloud-store-api/File/api-key:" + _user.ApiKey + "/download/" +
                             file.Id),
                     Path.Combine(path, file.Name));
                 return true;
@@ -276,7 +287,7 @@ public class ApiFileService
 
     public async Task<bool> DeleteFileAsync(FileModel file)
     {
-        var response = await _httpClient.DeleteAsync("https://localhost:7157/cloud-store-api/File/api-key:" +
+        var response = await _httpClient.DeleteAsync("https://26.187.175.30:7156/cloud-store-api/File/api-key:" +
                                                      _user.ApiKey + "/" + file.Id);
 
         return response.StatusCode switch
@@ -294,7 +305,7 @@ public class ApiFileService
 
         var response =
             await _httpClient.PutAsync(
-                "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + $"/update-file/{file.Id}",
+                "https://26.187.175.30:7156/cloud-store-api/File/api-key:" + _user.ApiKey + $"/update-file/{file.Id}",
                 content);
         if (response.IsSuccessStatusCode)
         {
@@ -308,7 +319,7 @@ public class ApiFileService
     public async Task<DirectoryForList?> MakeDirectoryAsync(string directory)
     {
         //https://localhost:7157/cloud-store-api/File/api-key:90546392470C5E893709E707FB70F88E/new-directory/testDir%2FDir
-        var url = "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/new-directory";
+        var url = "https://26.187.175.30:7156/cloud-store-api/File/api-key:" + _user.ApiKey + "/new-directory";
         var jsonContent = JsonContent.Create(directory);
         var response = await _httpClient.PostAsync(url, jsonContent);
 
@@ -323,7 +334,7 @@ public class ApiFileService
         HttpContent content = JsonContent.Create(oldDirectory);
 
         var response = await _httpClient.PutAsync(
-            "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey +
+            "https://26.187.175.30:7156/cloud-store-api/File/api-key:" + _user.ApiKey +
             $"/rename-directory/{newDirectoryName}", content);
 
         if (response.IsSuccessStatusCode)
@@ -336,14 +347,14 @@ public class ApiFileService
     {
         return
             await _httpClient.GetFromJsonAsync<long>(
-                $"https://localhost:7157/cloud-store-api/File/api-key:{_user.ApiKey}/file-size/{file.Id}");
+                $"https://26.187.175.30:7156/cloud-store-api/File/api-key:{_user.ApiKey}/file-size/{file.Id}");
     }
 
     public async Task<bool> DeleteDirectoryAsync(string directory)
     {
         HttpContent content = JsonContent.Create(directory);
         var response = await _httpClient.PutAsync(
-            "https://localhost:7157/cloud-store-api/File/api-key:" + _user.ApiKey + "/delete-directory", content);
+            "https://26.187.175.30:7156/cloud-store-api/File/api-key:" + _user.ApiKey + "/delete-directory", content);
         if (response.IsSuccessStatusCode)
             return true;
         return false;

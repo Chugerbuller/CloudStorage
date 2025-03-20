@@ -18,7 +18,7 @@ namespace CloudStore.UI.Services
             clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
             _httpClient = new HttpClient(clientHandler)
             {
-                BaseAddress = new Uri("https://localhost:7157/cloud-store-api/User/")
+                BaseAddress = new Uri("https://26.187.175.30:7156/cloud-store-api/User/")
             };
         }
 
