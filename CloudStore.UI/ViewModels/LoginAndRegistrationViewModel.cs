@@ -128,9 +128,13 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
             WatermarkPassword = "Неправильный пароль";
             return;
         }
-        catch (Exception ex)
+        catch (IOException ioEx)
         {
-            throw new Exception(ex.Message);
+            throw new IOException(ioEx.Message);
+        }
+        catch (Exception)
+        {
+            return;
         }
     }
 
