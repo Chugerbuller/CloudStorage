@@ -98,7 +98,6 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
             User = await _userService.AuthorizeUser(Login, Password);
             if (User is not null)
             {
-
                 if (RememberMe)
                 {
                     var userJsonByte = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(User));
@@ -118,9 +117,9 @@ public class LoginAndRegistrationViewModel : ViewModelBase, ICloseable
                 Closed(this, new EventArgs());
             }
         }
-        catch (ExistentLoginException)
+        catch (LoginException)
         {
-            WatermarkLogin = "Существующий логин";
+            WatermarkLogin = "Несуществующий логин";
             return;
         }
         catch (PasswordException)

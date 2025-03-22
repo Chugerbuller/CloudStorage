@@ -3,25 +3,21 @@ using CloudStore.BL.Models;
 using CloudStore.DAL;
 using CloudStore.WebApi.apiKeyValidation;
 using CloudStore.WebApi.Helpers.Models;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Memory;
-using System.IO;
-using System.Reflection.Metadata;
 
 namespace CloudStore.Hubs;
 
 [DisableRequestSizeLimit]
 public class LargeFileHub : Hub
 {
-    const int MB = 1024 * 1024;
+    private const int MB = 1024 * 1024;
     private readonly IWebHostEnvironment _webHostEnvironment;
     private readonly CSFilesDbHelper _dbFileHelper;
     private readonly CSUsersDbHelper _dbUserHelper;
     private readonly string _userDirectory;
     private readonly IApiKeyValidation _apiKeyValidation;
-    private Dictionary<string, PreparedLargeFile> _queueForFiles;
     private IMemoryCache _cache;
 
     public LargeFileHub(IWebHostEnvironment webHostEnvironment, CSFilesDbHelper dbHelper,
@@ -32,7 +28,6 @@ public class LargeFileHub : Hub
         _dbUserHelper = dbUserHelper;
         _apiKeyValidation = apiKeyValidation;
         _userDirectory = _webHostEnvironment.ContentRootPath + "\\Files";
-        _queueForFiles = new();
         _cache = cache;
     }
 
@@ -78,36 +73,29 @@ public class LargeFileHub : Hub
 
         var fileName = filePath.Split('\\')[^1];
         var extension = fileName.Split('.')[^1];
-
-        if (!_cache.TryGetValue(apiKey, out PreparedLargeFile cache))
+        if (!_cache.TryGetValue(apiKey, out _))
         {
             _cache.Set<PreparedLargeFile>(apiKey, new(path, fileName, extension, user));
             return true;
         }
-        if (!_queueForFiles.ContainsKey(apiKey))
-            if (!_queueForFiles.TryAdd(apiKey, new(path, fileName, extension, user)))
-                throw new Exception("can't add");
-            else return true;
-        
+
         return false;
     }
 
     public async Task UploadLargeFile(string apiKey, byte[] package, bool end)
     {
-        if (!_queueForFiles.TryGetValue(apiKey, out PreparedLargeFile? queue))
-        {
-            queue = _cache.Get<PreparedLargeFile>(apiKey);
-        }
-        
+        if (!_cache.TryGetValue(apiKey, out PreparedLargeFile? file))
+            throw new UnauthorizedAccessException();
+
         if (!end)
         {
-            queue.Packages.Enqueue(package);
+            file.Packages.Enqueue(package);
             return;
         }
         else if (end)
         {
-            queue.Packages.Enqueue(package);
-            var path = queue.File.Path;
+            file.Packages.Enqueue(package);
+            var path = file.File.Path;
 
             if (!File.Exists(path))
             {
@@ -119,11 +107,11 @@ public class LargeFileHub : Hub
             {
                 await using var fs = new FileStream(path, FileMode.Append, FileAccess.Write);
 
-                var packages = queue.Packages;
+                var packages = file.Packages;
 
                 while (packages.Count > 0)
                     await fs.WriteAsync(packages.Dequeue());
-                queue.FinishedFillingPackages = true;
+                file.FinishedFillingPackages = true;
             }
             catch (IOException ioEx)
             {
@@ -139,12 +127,8 @@ public class LargeFileHub : Hub
 
     public async Task<FileModel?> FinishFileUploading(string apiKey)
     {
-        if (!_queueForFiles.TryGetValue(apiKey, out PreparedLargeFile? preparedFile))
-        {
-            preparedFile = _cache.Get<PreparedLargeFile>(apiKey);
-            if (preparedFile == null)
-                throw new Exception("Why");
-        }
+        if (!_cache.TryGetValue(apiKey, out PreparedLargeFile? preparedFile))
+            throw new UnauthorizedAccessException();
         if (!preparedFile.FinishedFillingPackages)
             throw new Exception("File packages is not filled");
 
@@ -168,17 +152,16 @@ public class LargeFileHub : Hub
 
         var user = _dbUserHelper.GetUserByApiKey(apiKey);
         var file = await _dbFileHelper.GetFileByIdAsync(fileId, user);
-        
+
         var connectionId = Context.ConnectionId;
         var downloadId = Guid.NewGuid().ToString();
         _cache.Set(downloadId, new PreparedFileForDownload(file, connectionId));
-        
+
         return downloadId;
     }
 
     public async Task DownloadLargeFile(string downloadId)
     {
-        
         var file = _cache.Get<PreparedFileForDownload>(downloadId);
 
         var fileInfo = new FileInfo(file.File.Path);
@@ -190,13 +173,11 @@ public class LargeFileHub : Hub
         {
             var package = new byte[MB];
             await fs.ReadExactlyAsync(package);
-            await Clients.Client(file.ConnectionId).SendAsync("DownloadLargeFileCLient", package, downloadId,false);
+            await Clients.Client(file.ConnectionId).SendAsync("DownloadLargeFileCLient", package, downloadId, false);
         }
         var lastPackage = new byte[sizeOfLastPackage];
-        
+
         await fs.ReadExactlyAsync(lastPackage);
-        await Clients.Client(file.ConnectionId).SendAsync("DownloadLargeFileCLient", lastPackage,downloadId ,true );
-        
-        
+        await Clients.Client(file.ConnectionId).SendAsync("DownloadLargeFileCLient", lastPackage, downloadId, true);
     }
 }

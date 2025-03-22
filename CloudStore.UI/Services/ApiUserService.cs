@@ -29,10 +29,11 @@ namespace CloudStore.UI.Services
                 Login = login,
                 Password = password
             });
-            _httpClient.Dispose();
+            if (res.StatusCode == HttpStatusCode.OK)
+                _httpClient.Dispose();
             return res.StatusCode switch
             {
-                HttpStatusCode.OK => await res.Content.ReadFromJsonAsync<User>(), 
+                HttpStatusCode.OK => await res.Content.ReadFromJsonAsync<User>(),
                 HttpStatusCode.Conflict => throw new ExistentLoginException(),
                 HttpStatusCode.BadRequest => throw new NotValidException(),
                 _ => null,
@@ -46,15 +47,16 @@ namespace CloudStore.UI.Services
                 Login = login,
                 Password = password
             });
-            _httpClient.Dispose();
+            if (res.StatusCode == HttpStatusCode.OK)
+                _httpClient.Dispose();
+
             return res.StatusCode switch
             {
                 HttpStatusCode.OK => await res.Content.ReadFromJsonAsync<User>(),
-                HttpStatusCode.NotFound => throw new ExistentLoginException(),
+                HttpStatusCode.NotFound => throw new LoginException(),
                 HttpStatusCode.BadRequest => throw new PasswordException(),
                 _ => null,
             };
         }
-
     }
 }
